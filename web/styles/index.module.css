@@ -1,0 +1,40 @@
+.signinContainer {
+  min-height: 100vh;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.signinTitle {
+  text-align: center;
+  font-size: 18px;
+}
+
+.signinContent {
+  background-color: #ffffff;
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-radius: 5%;
+}
+
+.containerData {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+
+.containerColumn {
+  display: flex;
+  flex-direction: column;
+  margin-inline: 8px;
+  min-width: 250px;
+}
+
+.columnTitle {
+  text-align: center;
+  font-size: large;
+  padding: 14px;
+}

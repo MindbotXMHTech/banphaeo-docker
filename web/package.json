@@ -1,0 +1,32 @@
+{
+  "name": "banphaeo-web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "prod": "next build && next start"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^4.7.0",
+    "@ant-design/plots": "^1.2.2",
+    "antd": "^4.23.0",
+    "axios": "^0.27.2",
+    "json-to-csv-export": "^2.0.2",
+    "next": "^12.2.5",
+    "pg": "^8.8.0",
+    "react": "18.2.0",
+    "react-barcode": "^1.4.5",
+    "react-csv": "^2.2.2",
+    "react-dom": "18.2.0",
+    "react-qr-code": "^2.0.8",
+    "react-to-print": "^2.14.7",
+    "socket.io-client": "^4.5.3"
+  },
+  "devDependencies": {
+    "eslint": "8.23.0",
+    "eslint-config-next": "12.2.5"
+  }
+}

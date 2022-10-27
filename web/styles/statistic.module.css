@@ -1,0 +1,195 @@
+.containerCard {
+  margin: 20px;
+  background-color: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 1rem;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.typeOption {
+  padding: 0px;
+  margin: 0px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.typeOption p {
+  padding: 0px;
+  margin: 0px;
+}
+
+.typeOptionSelect {
+  flex: 1;
+}
+
+.chartArea {
+  padding: 0px;
+  margin: 0px;
+  display: flex;
+  flex-direction: row;
+}
+
+.chart {
+  width: 400px;
+  height: 400px !important;
+}
+
+.vtLine {
+  width: 5px;
+  background-color: #C4C4C4;
+  margin-top: 70px;
+  margin-bottom: 70px;
+  margin-inline: 20px;
+  border-radius: 2rem;
+}
+
+.sideData {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.btnExport {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+.datePicker {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  margin-bottom: 20px;
+}
+
+.datePickerBtn {
+  margin-inline: 8px;
+}
+
+.datePickerRange {
+  flex: 1;
+}
+
+.statData {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 10px;
+}
+
+.boxColor {
+  width: 20px;
+  height: 20px;
+}
+
+.card {
+  margin: 4px;
+  display: flex;
+  min-width: 200px;
+  flex-direction: column;
+  text-align: center;
+  border: 1px solid #e5e5e5;
+  border-radius: 1rem;
+  background-color: white;
+}
+
+.cardTop {
+  padding: 8px;
+  border-radius: 1rem 1rem 0rem 0rem;
+  color: white;
+}
+
+.cardBottom {
+  padding: 8px;
+}
+
+.card p {
+  margin: 0;
+}
+
+.textQueue {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.textNum {
+  padding: 10px;
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.textDt {
+  font-size: 10px;
+  color: #4E4D4D;
+}
+
+.textMore {
+  padding: 5px;
+  font-size: 10px;
+  color: #4E4D4D;
+}
+
+.containerModal {
+  display: flex;
+  flex-direction: column;
+  margin: 24px;
+}
+
+.modalTitle {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  font-size: 24px;
+}
+
+.modalNum {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+.modalNumPart {
+  border: 1px solid white;
+  border-radius: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding-inline: 15px;
+  padding-top: 10px;
+}
+
+.modalFooter {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+}
+
+.modalFooterDetails {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.medStatusNull {
+  width: 50px;
+  margin-top: 4px;
+  background-color: #F2A541;
+}
+
+.medStatusTrue {
+  width: 50px;
+  margin-top: 4px;
+  background-color: #778472;
+}
+
+.medStatusFalse {
+  width: 50px;
+  margin-top: 4px;
+  background-color: #C06E52;
+}

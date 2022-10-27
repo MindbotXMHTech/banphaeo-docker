@@ -1,0 +1,4 @@
+{
+  "HOST": "http://localhost:8080",
+  "SOCKET_URI": "ws://localhost:8080"
+}
