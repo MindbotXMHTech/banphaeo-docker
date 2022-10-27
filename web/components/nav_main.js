@@ -68,7 +68,6 @@ export default function NavMain(props) {
       })
     }
     setOpen(true);
-    console.log('modalPage :>> ', modalPage);
   };
 
   function handleOk () {

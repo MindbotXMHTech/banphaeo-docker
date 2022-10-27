@@ -30,11 +30,9 @@ export default function Register() {
   async function clickRegister() {
     let res = await apis.register(inpFname, inpLname, inpEmail, inpPassword, inpMobile, inpRole)
     if (res.success) {
-      console.log("true")
       message.success(res.msg);
     }
     else {
-      console.log("false")
       message.error(res.msg);
     }
   }

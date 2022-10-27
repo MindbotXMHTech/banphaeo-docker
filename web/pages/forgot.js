@@ -22,8 +22,6 @@ export default function Register() {
   const router = useRouter()
 
   function clickNext() {
-    console.log('inp :>> ', inp);
-    console.log('requestState :>> ', requestState);
     if (requestState === 1) {
       // TODO send forgot req
     }

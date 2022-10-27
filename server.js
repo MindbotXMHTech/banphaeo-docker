@@ -30,7 +30,6 @@ app.use(express.static("public"));
 // Socket.io
 
 io.on('connection', (socket) => {
-  console.log("a user connected");
   socket.on('update', () => {
     io.emit('update');
   });
@@ -172,7 +171,6 @@ app.get("/web_queue_cards", async (req, res) => {
         continue;
       }
       else {
-        console.log('else data :>> ', data);
       }
     }
 
@@ -214,7 +212,6 @@ app.get("/web_prescription_record/:id", async (req, res) => {
     for (let o of med_rec) {
       let foundind = med_list.findIndex(obj => obj.key === o['medical_id']);
       if (foundind === -1) {
-        console.log("add new");
         med_list.push({
           key: o['medical_id'],
           med_name: o['med_name'],
@@ -223,7 +220,6 @@ app.get("/web_prescription_record/:id", async (req, res) => {
         })
       }
       else {
-        console.log("exist");
         med_list[foundind] = {
           ...med_list[foundind],
           med_name: o['med_name'],
@@ -249,9 +245,7 @@ app.get("/web_prescription_record/:id", async (req, res) => {
           break;
       }
 
-      console.log('med_list :>> ', med_list);
       if ((ctrue !== 0 || cfalse !== 0) && cnull > 0) {
-        console.log("warning");
         prescriptionRecords['med_rec'].push({
           "submit_date": o['submit_date'],
           "ctrue": ctrue,
@@ -261,7 +255,6 @@ app.get("/web_prescription_record/:id", async (req, res) => {
         })
       }
       else if (cfalse > 0) {
-        console.log("error");
         prescriptionRecords['med_rec'].push({
           "submit_date": o['submit_date'],
           "ctrue": ctrue,
@@ -271,7 +264,6 @@ app.get("/web_prescription_record/:id", async (req, res) => {
         })
       }
       else if (ctrue === cdata) {
-        console.log("success");
         prescriptionRecords['med_rec'].push({
           "submit_date": o['submit_date'],
           "ctrue": ctrue,
@@ -281,7 +273,6 @@ app.get("/web_prescription_record/:id", async (req, res) => {
         })
       }
     }
-    console.log('prescriptionRecords :>> ', prescriptionRecords);
 
     prescriptionRecords['call'] = cdata
     prescriptionRecords['ctrue'] = ctrue
@@ -300,8 +291,6 @@ app.get("/web_prescription_record/:id", async (req, res) => {
 
 app.get("/web_prescription_stats", async (req, res) => {
   try {
-    console.log('req.query.start_date :>> ', req.query.start_date);
-    console.log('req.query.end_date :>> ', req.query.end_date);
     var start_date = req.query.start_date
     var end_date = req.query.end_date
   }
@@ -411,7 +400,6 @@ app.get("/web_prescription_stats", async (req, res) => {
         continue;
       }
       else {
-        console.log('else data :>> ', data);
       }
     }
 
@@ -423,10 +411,7 @@ app.get("/web_prescription_stats", async (req, res) => {
       error: cpfalse*100/cpdata
     }
 
-    console.log('summary :>> ', summary);
-    console.log('summary.success :>> ', summary.success);
     if (isNaN(summary.success) || summary.success == null) {
-      console.log('success nan')
       summary.success = 0
     }
     if (isNaN(summary.warning) || summary.warning == null) {
@@ -650,13 +635,11 @@ app.post("/hw_prescript", async (req, res) => {
 
       client.query(format('INSERT INTO medicine_records (med_name, dose, doctor, prescript_id) VALUES %L', insert_medicine_records),[], (error, results)=>{
         if(error){
-          console.log()
           res.status(400).send('Invalid data format in med_information Key')
         }
         else{
           io.emit('update');
           res.status(201).send("Prescript id : "+ prescript_id)
-          console.log()
         }
       }); 
     }

@@ -60,7 +60,6 @@ export default function Main() {
     socket.on("connect", () => { console.log("Connected:", socket.id) });
     socket.on("response", () => { console.log("Response:", socket.id) });
     socket.on("update", () => { 
-      console.log("Update");
       setUpCard();
     });
 
@@ -78,7 +77,6 @@ export default function Main() {
           setSiteToken(res)
         }
         else {
-          console.log('res :>> ', res);
           localStorage.clear()
           Router.reload(window.location.pathname)
         }

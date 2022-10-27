@@ -166,7 +166,6 @@ export default function CardMed(params) {
   }, [params])
 
   useEffect(() => {
-    console.log('cardDetails :>> ', cardDetails);
   }, [cardDetails])
 
   return (

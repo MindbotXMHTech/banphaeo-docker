@@ -151,9 +151,6 @@ export default function Stat() {
       }
       return 'grey';
     },
-    columnStyle: (v) => {
-      console.log('v :>> ', v);
-    },
     radius: 1,
     innerRadius: 0.6,
     legend: false,
@@ -195,7 +192,6 @@ export default function Stat() {
   })
 
   async function clickView(e) {
-    console.log(e)
     apis.prescriptionDetails(e.prescript_id).then((res) => {
       if (res !== null) {
         setCardDetails(() => ({
@@ -313,14 +309,6 @@ export default function Stat() {
       setSigninState(true)
     }
   }, [siteToken, router])
-
-  useEffect(() => {
-    console.log('selectedDate :>> ', selectedDate);
-  }, [selectedDate])
-
-  useEffect(() => {
-    console.log('summary :>> ', summary);
-  }, [summary])
 
   return (
     <div>

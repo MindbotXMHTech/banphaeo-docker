@@ -53,7 +53,6 @@ export default function Accounts() {
   const router = useRouter();
 
   async function clickView(e) {
-    console.log(e)
     setModalPage("ข้อมูลผู้ใช้งาน")
     setIsBtnViewLoading(true)
     await apis.user(e.id).then((res) => { 
@@ -101,9 +100,6 @@ export default function Accounts() {
   }
 
   function clickCancel() {
-    console.log("click cancel")
-    console.log('defaultUserData :>> ', defaultUserData);
-    console.log('userData :>> ', userData);
     setUserData(defaultUserData);
     setIsModalOpen(false);
   }
@@ -131,7 +127,6 @@ export default function Accounts() {
       userData.mobile,
       userData.type
     )
-    console.log('res :>> ', res);
     if (res.success) {
       message.success(res.msg);
       apis.userRows().then((res) => { setTableData(res) })
