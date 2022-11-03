@@ -51,6 +51,30 @@ export default class apis {
     }
   }
 
+  static async validateEmail(email) {
+    let res = await axios({
+      "method": "get",
+      "url": vars["HOST"] + "/web_validate_email",
+      "params": {
+        "email": email
+      }
+    }).catch((err) => {
+      if (err.response.status == 422) {
+        return {"success": false, "msg": "รูปแบบข้อมูล email ไม่ถูกต้อง กรุณาตรวจสอบข้อมูลใหม่อีกครั้ง"}
+      }
+      else {
+        return {"success": false, "msg": "Unknown query error occured."}
+      }
+    })
+
+    if (res.data == "0") {
+      return {"success": true, "msg": "สามารถใช้ email นี้ได้"}
+    }
+    else {
+      return {"success": false, "msg": "อีเมลนี้เคยลงทะเบียนไปแล้ว กรุณาลอง email อื่น หรือกด \"ลืมรหัสผ่าน\""}
+    }
+  }
+
   static async resetPassword(id, newpassword) {
     let res = await axios({
       "method": "put",

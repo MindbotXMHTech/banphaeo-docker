@@ -4,22 +4,29 @@ import styles from '../styles/index.module.css';
 import { useEffect, useState } from 'react';
 import { UserOutlined, EyeInvisibleOutlined, EyeTwoTone, LoadingOutlined } from '@ant-design/icons';
 import { Button, Input, Col, Row, Select, Alert, message } from 'antd';
+import MaskedInput from "antd-mask-input";
 import { useRouter } from 'next/router';
 import FooterMain from '../components/footer_main';
 import NavMain from '../components/nav_main';
 import LoadingMain from '../components/loading_main'
 import HeaderMain from '../components/header_main';
 import apis from '../manager/apis';
+import utilFuncs from '../manager/utils'
 
 export default function Register() {
   const [signinState, setSigninState] = useState(null);
   const [siteToken, setSiteToken] = useState(null);
   const [inpEmail, setInpEmail] = useState('');
+  const [inpEmailStatus, setInpEmailStatus] = useState('');
   const [inpFname, setInpFname] = useState('');
+  const [inpFnameStatus, setInpFnameStatus] = useState('');
   const [inpLname, setInpLname] = useState('');
+  const [inpLnameStatus, setInpLnameStatus] = useState('');
   const [inpMobile, setInpMobile] = useState('');
+  const [inpMobileStatus, setInpMobileStatus] = useState('');
   const [inpRole, setInpRole] = useState('staff');
   const [inpPassword, setInpPassword] = useState('');
+  const [inpPasswordStatus, setInpPasswordStatus] = useState(null);
   const [inpRePassword, setInpRePassword] = useState('');
   const [inpRePasswordStatus, setInpRePasswordStatus] = useState(null);
   const [btnRegisterStatus, setBtnRegisterStatus] = useState(false);
@@ -31,6 +38,7 @@ export default function Register() {
     let res = await apis.register(inpFname, inpLname, inpEmail, inpPassword, inpMobile, inpRole)
     if (res.success) {
       message.success(res.msg);
+      router.push('/');
     }
     else {
       message.error(res.msg);
@@ -54,13 +62,13 @@ export default function Register() {
 
   useEffect(() => {
     if (
-      inpEmail.length !== 0 &&
+      inpEmail.length !== 0 && !inpEmailStatus &&
       inpFname.length !== 0 &&
       inpLname.length !== 0 &&
-      inpMobile.length !== 0 &&
+      inpMobile.length === 10 &&
       inpRole.length !== 0 &&
-      inpPassword.length !== 0 &&
-      inpRePassword.length !== 0 &&
+      inpPassword.length > 5 &&
+      inpRePassword.length > 5 &&
       inpPassword === inpRePassword
     ) {
       setBtnRegisterStatus(true)
@@ -83,13 +91,66 @@ export default function Register() {
           <div className={styles.signinContainer}>
             <div className={styles.signinContent}>
               <p className={styles.signinTitle}>สมัครสมาชิก</p>
-              <Input type='email' placeholder="อีเมล" onChange={(e) => {setInpEmail(e.target.value)}} />
+              <Input style={{border:inpEmailStatus}} 
+                type='email' 
+                placeholder="อีเมล" 
+                onChange={async (e) => {
+                  setInpEmail(e.target.value)
+                  const isEmailExist = await apis.validateEmail(e.target.value)
+                  if (utilFuncs.validateEmail(e.target.value) == null) {
+                    setInpEmailStatus('1px solid red')
+                  }
+                  else if (!isEmailExist.success) {
+                    message.error(isEmailExist.msg)
+                    setInpEmailStatus('1px solid red')
+                  }
+                  else {
+                    setInpEmailStatus(null)
+                  }
+                }} />
               <br />
-              <Input type='text' placeholder="ชื่อ" onChange={(e) => {setInpFname(e.target.value)}}/>
+              <Input style={{border:inpFnameStatus}} 
+                type='text' 
+                placeholder="ชื่อ" 
+                onChange={(e) => {
+                  setInpFname(e.target.value)
+                  if (e.target.value == null || e.target.value == "") {
+                    setInpFnameStatus('1px solid red')
+                  }
+                  else {
+                    setInpFnameStatus(null)
+                  }
+                }} />
               <br />
-              <Input type='text' placeholder="นามสกุล" onChange={(e) => {setInpLname(e.target.value)}} />
+              <Input style={{border:inpLnameStatus}} 
+                type='text' 
+                placeholder="นามสกุล" 
+                onChange={(e) => {
+                  setInpLname(e.target.value)
+                  if (e.target.value == null || e.target.value == "") {
+                    setInpLnameStatus('1px solid red')
+                  }
+                  else {
+                    setInpLnameStatus(null)
+                  }
+                }} />
               <br />
-              <Input type='tel' placeholder="เบอร์โทรศัพท์" onChange={(e) => {setInpMobile(e.target.value)}} />
+              <MaskedInput
+                style={{border:inpMobileStatus}} 
+                mask={
+                  '000-000-0000'
+                }
+                type='text' 
+                placeholder="เบอร์โทรศัพท์" 
+                onChange={(e) => {
+                  setInpMobile(e.unmaskedValue)
+                  if (e.unmaskedValue == null || e.unmaskedValue.length !== 10) {
+                    setInpMobileStatus('1px solid red')
+                  }
+                  else {
+                    setInpMobileStatus(null)
+                  }
+                }} />
               <br />
               <Row style={{alignItems:'center'}}>
                 <Col style={{textAlign:'center'}} span={7}>ผู้จัดยา : </Col>
@@ -110,9 +171,18 @@ export default function Register() {
               </Row>
               <br />
               <Input.Password 
-                placeholder="รหัสผ่าน" 
+                style={{border:inpPasswordStatus}}
+                placeholder="รหัสผ่าน 6 ตัวอักษรขึ้นไป" 
                 iconRender={visible => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
-                onChange={(e) => {setInpPassword(e.target.value)}}
+                onChange={(e) => {
+                  setInpPassword(e.target.value)
+                  if (e.target.value == null || e.target.value.length < 6) {
+                    setInpPasswordStatus('1px solid red')
+                  }
+                  else {
+                    setInpPasswordStatus(null)
+                  }
+                }}
               />
               <br />
               <Input.Password 
@@ -121,7 +191,7 @@ export default function Register() {
                 iconRender={visible => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
                 onChange={(e) => {
                   setInpRePassword(e.target.value)
-                  if (e.target.value === inpPassword) {
+                  if (e.target.value === inpPassword && e.target.value.length > 5) {
                     setInpRePasswordStatus(null)
                   }
                   else {

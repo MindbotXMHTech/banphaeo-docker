@@ -87,6 +87,34 @@ app.post("/web_login", async (req, res) => {
   }
 });
 
+app.get("/web_validate_email", async (req,res) => {
+  try {
+    format = String(req.query.email)
+      .toLowerCase()
+      .match(
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+      );
+    
+    if (!format) {
+      res.status(422).send("Invalid data format.")
+    }
+
+    const results = await client
+      .query("SELECT count(1) FROM users WHERE email=$1", [req.query.email])
+      .then((payload) => {
+        console.log('count :>> ', payload);
+        return payload;
+      })
+    res.setHeader("Content-Type", "application/json");
+    res.status(200).send(JSON.stringify(results.rows[0]["count"]));
+  }
+  catch (err) {
+    console.error(err);
+    res.status(500).send("Internal server error.");
+    throw new Error("Query failed");
+  }
+})
+
 app.get("/web_users", async (req, res) => {
   try {
     const results = await client

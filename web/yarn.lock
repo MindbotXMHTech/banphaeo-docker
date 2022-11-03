@@ -458,7 +458,14 @@
   dependencies:
     "color-convert" "^2.0.1"
 
-"antd@^4.23.0":
+"antd-mask-input@^2.0.7":
+  "integrity" "sha512-EFv/Hjar5nzYuzvgCcIeEcbVzw5+4RynUQTl2S8bLMaR9iajiWoeV/VYvENaP6X+ytnM0OqemE2pHY9ZRR6hEw=="
+  "resolved" "https://registry.npmjs.org/antd-mask-input/-/antd-mask-input-2.0.7.tgz"
+  "version" "2.0.7"
+  dependencies:
+    "imask" "6.4.2"
+
+"antd@^4.23.0", "antd@>=4.19.0":
   "integrity" "sha512-a0voELfS5lDy6NCcDNbDUMv2OZ+IfeX/kYxaRnRJj0/R4tPJWAqs0bqFVpdk5y8JsPl6B396bTVzKZo49e+uvA=="
   "resolved" "https://registry.npmjs.org/antd/-/antd-4.23.0.tgz"
   "version" "4.23.0"
@@ -1439,6 +1446,11 @@
   "integrity" "sha512-CmxgYGiEPCLhfLnpPp1MoRmifwEIOgjcHXxOBjv7mY96c+eWScsOP9c112ZyLdWHi0FxHjI+4uVhKYp/gcdRmQ=="
   "resolved" "https://registry.npmjs.org/ignore/-/ignore-5.2.0.tgz"
   "version" "5.2.0"
+
+"imask@6.4.2":
+  "integrity" "sha512-xvEgbTdk6y2dW2UAysq0NRPmO6PuaXM5NHIt4TXEJEwXUHj26M0p/fXqyrSJdNXFaGVOtqYjPRnNdrjQQhDuuA=="
+  "resolved" "https://registry.npmjs.org/imask/-/imask-6.4.2.tgz"
+  "version" "6.4.2"
 
 "import-fresh@^3.0.0", "import-fresh@^3.2.1":
   "integrity" "sha512-veYYhQa+D1QBKznvhUHxb8faxlrwUnxseDAbAp457E0wLNio2bOSKnjYDhMj+YiAq61xrMGhQk9iXVk5FzgQMw=="
