@@ -100,8 +100,7 @@ export default function CardMed(params) {
     apis.prescriptionDetails(params.prescript_id).then((res) => {
       if (res !== null) {
         setCardDetails((prev) => ({
-          ...res,
-          doctor: "ไม่พบข้อมูล",
+          ...res
         }))
       }
     })
@@ -228,9 +227,9 @@ export default function CardMed(params) {
                     <Col span={3}>จำนวน</Col>
                     <Col span={3}>สถานะ</Col>
                   </Row>
-                  {cardDetails.med_rec[0]["list"].map((med) => (
+                  {cardDetails.med_rec[cardDetails.med_rec.length-1]["list"].map((med, ind) => (
                     <Row key={med["key"]}>
-                      <Col span={3}>{med["key"]}</Col>
+                      <Col span={3}>{ind+1}</Col>
                       <Col span={14}>{med["med_name"]}</Col>
                       <Col span={3}>{med["dose"]}</Col>
                       {med["status"] == true && <Col span={3} className={styles.medStatusTrue}></Col>}
@@ -266,9 +265,9 @@ export default function CardMed(params) {
                         <Col span={3}>จำนวน</Col>
                         <Col span={3}>สถานะ</Col>
                       </Row>
-                      {o["list"].map((med) => (
+                      {o["list"].map((med, ind) => (
                         <Row key={med["key"]}>
-                          <Col span={3}>{med["key"]}</Col>
+                          <Col span={3}>{ind+1}</Col>
                           <Col span={14}>{med["med_name"]}</Col>
                           <Col span={3}>{med["dose"]}</Col>
                           {med["status"] == true && <Col span={3} className={styles.medStatusTrue}></Col>}

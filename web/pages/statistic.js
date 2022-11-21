@@ -195,8 +195,7 @@ export default function Stat() {
     apis.prescriptionDetails(e.prescript_id).then((res) => {
       if (res !== null) {
         setCardDetails(() => ({
-          ...res,
-          doctor: "ไม่พบข้อมูล",
+          ...res
         }))
       }
     })
@@ -407,7 +406,7 @@ export default function Stat() {
                             <Col span={3}>จำนวน</Col>
                             <Col span={3}>สถานะ</Col>
                           </Row>
-                          {cardDetails.med_rec[0]["list"].map((med) => (
+                          {cardDetails.med_rec[cardDetails.med_rec.length-1]["list"].map((med) => (
                             <Row key={med["key"]}>
                               <Col span={3}>{med["key"]}</Col>
                               <Col span={14}>{med["med_name"]}</Col>

@@ -29,26 +29,6 @@ export default function Main() {
     "warning": []
   })
 
-  async function clickSignin() {
-    let res = await apis.login(inpEmail, inpPassword);
-    if (res.success) {
-      message.success(res.msg);
-
-      let token = "mock"
-      localStorage.setItem("site-token", token)
-      localStorage.setItem("user_id", res.profile.user_id)
-      localStorage.setItem("name", res.profile.name)
-      localStorage.setItem("surname", res.profile.surname)
-      localStorage.setItem("email", res.profile.email)
-      localStorage.setItem("tel_number", res.profile.tel_number)
-      localStorage.setItem("role", res.profile.role)
-      setSiteToken(token)
-    }
-    else {
-      message.error(res.msg);
-    }
-  }
-
   async function setUpCard() {
     // TODO add login_id
     let prescriptionRecords = await apis.prescriptionCards("some id")
@@ -171,7 +151,25 @@ export default function Main() {
                 onChange={(e) => {setInpPassword(e.target.value)}}
               />
               <br />
-              <Button type="primary" shape="round" size='middle' onClick={clickSignin}>
+              <Button type="primary" shape="round" size='middle' onClick={async () => {
+                let res = await apis.login(inpEmail, inpPassword);
+                if (res.success) {
+                  message.success(res.msg);
+            
+                  let token = "mock"
+                  localStorage.setItem("site-token", token)
+                  localStorage.setItem("user_id", res.profile.user_id)
+                  localStorage.setItem("name", res.profile.name)
+                  localStorage.setItem("surname", res.profile.surname)
+                  localStorage.setItem("email", res.profile.email)
+                  localStorage.setItem("tel_number", res.profile.tel_number)
+                  localStorage.setItem("role", res.profile.role)
+                  setSiteToken(token)
+                }
+                else {
+                  message.error(res.msg);
+                }
+              }} >
                 เข้าสู่ระบบ
               </Button>
               <Link href="/forgot">

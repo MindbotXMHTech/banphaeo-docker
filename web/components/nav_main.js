@@ -4,10 +4,29 @@ import { useEffect, useState } from 'react';
 import Router from 'next/router';
 import QRCode from 'react-qr-code';
 import apis from '../manager/apis';
+import utilFuncs from '../manager/utils';
+import { MaskedInput } from 'antd-mask-input';
 
 export default function NavMain(props) {
+  const defaultInpProfileStatus = {
+    "email": null,
+    "name": null,
+    "surname": null,
+    "tel_number": null,
+    "role": null
+  }
   const [btnDisable, setBtnDisable] = useState(false);
+  const [btnSaveProfileDisable, setBtnSaveProfileDisable] = useState(false);
+  const [btnSavePasswordDisable, setBtnSavePasswordDisable] = useState(false);
   const [inpDisable, setInpDisable] = useState(true);
+  const [inpProfileFix, setInpProfileFix] = useState({
+    "user_id": "ไม่พบข้อมูล",
+    "email": "",
+    "name": "",
+    "surname": "",
+    "tel_number": "",
+    "role": ""
+  })
   const [inpProfile, setInpProfile] = useState({
     "user_id": "ไม่พบข้อมูล",
     "email": "",
@@ -17,6 +36,7 @@ export default function NavMain(props) {
     "role": ""
   })
   const [inpPassword, setInpPassword] = useState('');
+  const [inpProfileStatus, setInpProfileStatus] = useState(defaultInpProfileStatus)
 
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -38,7 +58,7 @@ export default function NavMain(props) {
       <Button key="cancelEdit" onClick={clickCancelEditProfile} disabled={btnDisable}>
         ยกเลิก
       </Button>,
-      <Button key="save" type="primary" onClick={clickSaveProfile} loading={loading} disabled={btnDisable}>
+      <Button key="save" type="primary" onClick={clickSaveProfile} loading={loading} disabled={btnSaveProfileDisable}>
         บันทึก
       </Button>
     ],
@@ -46,7 +66,7 @@ export default function NavMain(props) {
       <Button key="cancelEdit" onClick={clickCancelEditPassword} disabled={btnDisable}>
         ยกเลิก
       </Button>,
-      <Button key="savePassword" type="primary" onClick={clickSavePassword} loading={loading} disabled={btnDisable}>
+      <Button key="savePassword" type="primary" onClick={clickSavePassword} loading={loading} disabled={btnSavePasswordDisable}>
         บันทึก
       </Button>
     ]
@@ -64,12 +84,14 @@ export default function NavMain(props) {
     else {
       await apis.user(uid).then((res) => {
         setInpProfile(res)
+        setInpProfileFix(res)
         setOpen(true);
       })
     }
     setOpen(true);
   };
 
+  // handle modal's general event
   function handleOk () {
     setLoading(true);
     setTimeout(() => {
@@ -83,6 +105,7 @@ export default function NavMain(props) {
     setOpen(false);
   };
 
+  // handle logout
   function clickLogout () {
     confirm({
       icon: <ExclamationCircleOutlined />,
@@ -105,6 +128,7 @@ export default function NavMain(props) {
     setOpenLogout(false)
   }
 
+  // handle modal show profile
   function clickEditPassword () {
     setInpDisable(false)
     setModalPage("แก้ไขรหัสผ่าน")
@@ -115,9 +139,12 @@ export default function NavMain(props) {
     setModalPage("แก้ไขข้อมูล")
   }
 
+  // handle modal edit profile
   function clickCancelEditProfile () {
     setInpDisable(true)
     setModalPage("ข้อมูลทั่วไป");
+    setInpProfile(inpProfileFix)
+    setInpProfileStatus(defaultInpProfileStatus)
   }
 
   async function clickSaveProfile() {
@@ -125,23 +152,20 @@ export default function NavMain(props) {
     setBtnDisable(true);
     let res = await apis.editProfile(inpProfile.user_id, inpProfile.name, inpProfile.surname, inpProfile.email, inpProfile.tel_number, inpProfile.role)
     if (res.success) {
-      setModalPage("ข้อมูลทั่วไป");
       setLoading(false);
       setOpen(false);
       setBtnDisable(false);
-      setInpDisable(true);
       message.success(res.msg)
     }
     else {
-      setModalPage("ข้อมูลทั่วไป");
       setLoading(false);
       setOpen(false);
       setBtnDisable(false);
-      setInpDisable(true);
       message.error(res.msg)
     }
   }
 
+  // handle modal edit password
   function clickCancelEditPassword() {
     setInpDisable(true);
     setModalPage("ข้อมูลทั่วไป");
@@ -152,22 +176,41 @@ export default function NavMain(props) {
     setInpDisable(true);
     let res = await apis.resetPassword(inpProfile.user_id, inpPassword)
     if (res.success) {
-      setModalPage("ข้อมูลทั่วไป");
       setLoading(false);
       setOpen(false);
       setBtnDisable(false);
-      setInpDisable(true);
       message.success(res.msg)
     }
     else {
-      setModalPage("ข้อมูลทั่วไป");
       setLoading(false);
       setOpen(false);
       setBtnDisable(false);
-      setInpDisable(true);
       message.error(res.msg)
     }
   }
+
+  useEffect(() => {
+    if (!open) {
+      setModalPage("ข้อมูลทั่วไป");
+      setInpDisable(true);
+      setInpProfileStatus(defaultInpProfileStatus)
+    }
+  }, [open])
+
+  useEffect(() => {
+    if (
+      inpProfile.name.length !== 0 && 
+      inpProfileStatus.email !== '1px solid red' &&
+      inpProfile.email.length !== 0 && 
+      inpProfile.surname.length !== 0 &&
+      inpProfile.tel_number.length === 10 &&
+      inpProfile.role.length !== 0
+    ) {
+      setBtnSaveProfileDisable(false)
+    } else {
+      setBtnSaveProfileDisable(true)
+    }
+  }, [inpProfile, inpProfileStatus])
 
   return (
     <div className='nav-main'>
@@ -188,19 +231,64 @@ export default function NavMain(props) {
                   <Row style={{alignItems:'center', marginBottom:'14px'}}>
                     <Col span={9}>ชื่อ : </Col>
                     <Col>
-                      <Input type='text' placeholder="ชื่อ" value={inpProfile.name} onChange={(e) => {setInpProfile((prev) => ({...prev, "name":e.target.value}))}} disabled={inpDisable}/>
+                      <Input 
+                        style={{border:inpProfileStatus.name}} 
+                        type='text' 
+                        placeholder="ชื่อ" 
+                        value={inpProfile.name} 
+                        onChange={(e) => {
+                          setInpProfile((prev) => ({...prev, "name":e.target.value}))
+                          if (e.target.value == null || e.target.value == "") {
+                            setInpProfileStatus((prev) => ({...prev, "name":'1px solid red'}))
+                          }
+                          else {
+                            setInpProfileStatus((prev) => ({...prev, "name":null}))
+                          }
+                        }} 
+                        disabled={inpDisable}/>
                     </Col>
                   </Row>
                   <Row style={{alignItems:'center', marginBottom:'14px'}}>
                     <Col span={9}>นามสกุล : </Col>
                     <Col>
-                      <Input type='text' placeholder="นามสกุล" value={inpProfile.surname} onChange={(e) => {setInpProfile((prev) => ({...prev, "surname":e.target.value}))}} disabled={inpDisable}/>
+                      <Input 
+                        style={{border:inpProfileStatus.surname}} 
+                        type='text' 
+                        placeholder="นามสกุล" 
+                        value={inpProfile.surname} 
+                        onChange={(e) => {
+                          setInpProfile((prev) => ({...prev, "surname":e.target.value}))
+                          if (e.target.value == null || e.target.value == "") {
+                            setInpProfileStatus((prev) => ({...prev, "surname":'1px solid red'}))
+                          }
+                          else {
+                            setInpProfileStatus((prev) => ({...prev, "surname":null}))
+                          }
+                        }} 
+                        disabled={inpDisable}/>
                     </Col>
                   </Row>
                   <Row style={{alignItems:'center', marginBottom:'14px'}}>
                     <Col span={9}>เบอร์โทรศัพท์ : </Col>
                     <Col>
-                      <Input type='text' placeholder="เบอร์โทรศัพท์" value={inpProfile.tel_number} onChange={(e) => {setInpProfile((prev) => ({...prev, "tel_number":e.target.value}))}} disabled={inpDisable}/>
+                      <MaskedInput
+                        style={{border:inpProfileStatus.tel_number}} 
+                        mask={
+                          '000-000-0000'
+                        }
+                        type='text' 
+                        placeholder="เบอร์โทรศัพท์" 
+                        value={inpProfile.tel_number} 
+                        onChange={(e) => {
+                          setInpProfile((prev) => ({...prev, "tel_number":e.unmaskedValue}))
+                          if (e.unmaskedValue == null || e.unmaskedValue.length !== 10) {
+                            setInpProfileStatus((prev) => ({...prev, "tel_number":'1px solid red'}))
+                          }
+                          else {
+                            setInpProfileStatus((prev) => ({...prev, "tel_number":null}))
+                          }
+                        }} 
+                        disabled={inpDisable} />
                     </Col>
                   </Row>
                   {inpProfile.role !== 'admin' &&
@@ -227,7 +315,24 @@ export default function NavMain(props) {
                   <Row style={{alignItems:'center', marginBottom:'14px'}}>
                     <Col span={9}>อีเมล : </Col>
                     <Col>
-                      <Input type='text' placeholder="อีเมล" value={inpProfile.email} onChange={(e) => {setInpProfile((prev) => ({...prev, "email":e.target.value}))}} disabled={inpDisable}/>
+                      <Input style={{border:inpProfileStatus.email}} 
+                        type='text' placeholder="อีเมล" 
+                        value={inpProfile.email} 
+                        onChange={async (e) => {
+                          setInpProfile((prev) => ({...prev, "email":e.target.value}))
+                          const isEmailExist = await apis.validateEmail(e.target.value)
+                          if (utilFuncs.validateEmail(e.target.value) == null) {
+                            setInpProfileStatus((prev) => ({...prev, "email":'1px solid red'}))
+                          }
+                          else if (!isEmailExist.success && e.target.value !== inpProfileFix.email) {
+                            message.error(isEmailExist.msg)
+                            setInpProfileStatus((prev) => ({...prev, "email":'1px solid red'}))
+                          }
+                          else {
+                            setInpProfileStatus((prev) => ({...prev, "email":null}))
+                          }
+                        }} 
+                        disabled={inpDisable}/>
                     </Col>
                   </Row>
                 </div>
@@ -244,7 +349,7 @@ export default function NavMain(props) {
                     <Input type='text' placeholder="รหัสผ่านใหม่" onChange={(e) => {setInpPassword(e.target.value)}}/>
                   </Col>
                 </Row>
-            </div>
+              </div>
             }
           </Modal>
         </div>

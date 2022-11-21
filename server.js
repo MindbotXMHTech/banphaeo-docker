@@ -17,15 +17,24 @@ const client = new Client({
   host: "postgres",
 });
 
+
+// Functions
+function reformat_date(mydt) {
+  // dd/MM/yyyy hh:mm:ss
+  return `${mydt.getDate()}/${(mydt.getMonth()<9?'0':'')+(mydt.getMonth()+1)}/${mydt.getFullYear()} ${(mydt.getHours()<10?'0':'')+mydt.getHours()}:${(mydt.getMinutes()<10?'0':'')+mydt.getMinutes()}:${(mydt.getSeconds()<10?'0':'')+mydt.getSeconds()}`
+}
+
+
 app.use(cors());
 app.use(express.json())
 app.use(express.static("public"));
 
 // Cron jobs
 
-// cron.schedule('* * * * *', () => {
-//   console.log('Run task every minute');
-// });
+cron.schedule('* * * * *', () => {
+  console.log('Run task every minute');
+  io.emit('update');
+});
 
 // Socket.io
 
@@ -142,7 +151,7 @@ app.get("/web_queue_cards", async (req, res) => {
 
     for (let i = 0; i < prescriptionRecords.length; i++) {
       let med_status = await client
-        .query("SELECT medical_id, status FROM medicine_records WHERE prescript_id=$1", [prescriptionRecords[i].prescript_id])
+        .query("SELECT medical_id, status, submit_date FROM medicine_records WHERE prescript_id=$1", [prescriptionRecords[i].prescript_id])
         .then((payload) => {
           return payload.rows
         })
@@ -160,9 +169,16 @@ app.get("/web_queue_cards", async (req, res) => {
       let cnull = 0
       let cfalse = 0
       let ctrue = 0
+
+      let tnow = new Date()
+      let tdiff = 0
+
       for (let o of data["med_status"]) {
         switch (o["status"]) {
           case null:
+            if (cnull + ctrue + cfalse === 0) {
+              tdiff = (tnow-o["submit_date"])/60000
+            }
             cnull++;
             break;
 
@@ -178,14 +194,16 @@ app.get("/web_queue_cards", async (req, res) => {
             break;
         }
       }
+
       let cobj = {
         "pid": data["prescript_id"],
         "queueId": data["waiting_queue"],
         "prescriptId": data["prescript_no"],
         "numPart": ctrue,
         "numAll": cdata,
-        "dt": data["submit_date"]
+        "dt": reformat_date(data["submit_date"])
       };
+
       if (cdata !== cnull && cnull > 0) {
         cards["warning"].push(cobj);
         continue;
@@ -198,7 +216,12 @@ app.get("/web_queue_cards", async (req, res) => {
         cards["success"].push(cobj);
         continue;
       }
+      else if (tdiff > 15) {
+        cards["warning"].push(cobj);
+        continue;
+      }
       else {
+        console.log(`Prescription ID ${data["prescript_id"]} is ignored. [tdiff = ${tdiff}]`);
       }
     }
 
@@ -224,19 +247,21 @@ app.get("/web_prescription_record/:id", async (req, res) => {
           res.status(200).send(null)
         }
       });
+    prescriptionRecords['submit_date'] = reformat_date(prescriptionRecords['submit_date'])
 
     let med_rec = await client
-      .query("SELECT * FROM medicine_records WHERE prescript_id=$1 ORDER BY submit_date ASC", [prescriptionRecords.prescript_id])
+      .query("SELECT * FROM medicine_records WHERE prescript_id=$1 ORDER BY medical_id ASC", [prescriptionRecords.prescript_id])
       .then((payload) => {
         return payload.rows
       })
 
     prescriptionRecords['med_rec'] = []
-    med_list = []
-    cdata = med_rec.length
-    cnull = 0
-    cfalse = 0
-    ctrue = 0
+    let med_list = []
+    let cdata = med_rec.length
+    let cnull = 0
+    let cfalse = 0
+    let ctrue = 0
+
     for (let o of med_rec) {
       let foundind = med_list.findIndex(obj => obj.key === o['medical_id']);
       if (foundind === -1) {
@@ -273,33 +298,35 @@ app.get("/web_prescription_record/:id", async (req, res) => {
           break;
       }
 
-      if ((ctrue !== 0 || cfalse !== 0) && cnull > 0) {
+      if (cnull > 0) {
         prescriptionRecords['med_rec'].push({
-          "submit_date": o['submit_date'],
+          "submit_date": reformat_date(o['submit_date']),
           "ctrue": ctrue,
           "cfalse": cfalse,
           "cnull": cnull,
-          "list": med_list.sort((a,b) => a.key - b.key)
+          "list": JSON.parse(JSON.stringify(med_list.sort((a,b) => a.key - b.key)))
         })
       }
       else if (cfalse > 0) {
         prescriptionRecords['med_rec'].push({
-          "submit_date": o['submit_date'],
+          "submit_date": reformat_date(o['submit_date']),
           "ctrue": ctrue,
           "cfalse": cfalse,
           "cnull": cnull,
-          "list": med_list.sort((a,b) => a.key - b.key)
+          "list": JSON.parse(JSON.stringify(med_list.sort((a,b) => a.key - b.key)))
         })
       }
       else if (ctrue === cdata) {
         prescriptionRecords['med_rec'].push({
-          "submit_date": o['submit_date'],
+          "submit_date": reformat_date(o['submit_date']),
           "ctrue": ctrue,
           "cfalse": cfalse,
           "cnull": cnull,
-          "list": med_list.sort((a,b) => a.key - b.key)
+          "list": JSON.parse(JSON.stringify(med_list.sort((a,b) => a.key - b.key)))
         })
       }
+
+      prescriptionRecords['doctor'] = (prescriptionRecords['doctor'] !== undefined && prescriptionRecords['doctor'].length > 0)?`${prescriptionRecords['doctor']}, ${o['doctor']}`:o['doctor']
     }
 
     prescriptionRecords['call'] = cdata
@@ -398,6 +425,7 @@ app.get("/web_prescription_stats", async (req, res) => {
         cpnull++;
         table.push({
           ...data,
+          "submit_date": reformat_date(data["submit_date"]),
           "status": parse_status("warning"),
           "num": `${ctrue}/${cdata}`,
           "numPart": ctrue,
@@ -409,6 +437,7 @@ app.get("/web_prescription_stats", async (req, res) => {
         cpfalse++;
         table.push({
           ...data,
+          "submit_date": reformat_date(data["submit_date"]),
           "status": parse_status("error"),
           "num": `${ctrue}/${cdata}`,
           "numPart": ctrue,
@@ -420,6 +449,7 @@ app.get("/web_prescription_stats", async (req, res) => {
         cptrue++;
         table.push({
           ...data,
+          "submit_date": reformat_date(data["submit_date"]),
           "status": parse_status("success"),
           "num": `${ctrue}/${cdata}`,
           "numPart": ctrue,

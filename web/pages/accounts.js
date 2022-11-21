@@ -123,7 +123,6 @@ export default function Accounts() {
       userData.name,
       userData.surname,
       userData.email,
-      userData.id,
       userData.mobile,
       userData.type
     )
@@ -180,12 +179,6 @@ export default function Accounts() {
                 {modalPage == "เพิ่มผู้ใช้งาน" &&
                   <div>
                     <Row style={{alignItems:'center', marginBottom:'14px'}}>
-                      <Col span={7}>หมายเลขพนักงาน :</Col>
-                      <Col>
-                        <Input value={userData.user_id} onChange={(e) => {setUserData((prev) => ({...prev, "id":e.target.value}))}} />
-                      </Col>
-                    </Row>
-                    <Row style={{alignItems:'center', marginBottom:'14px'}}>
                       <Col span={7}>ชื่อ :</Col>
                       <Col>
                         <Input value={userData.name} onChange={(e) => {setUserData((prev) => ({...prev, "name":e.target.value}))}} />
@@ -231,12 +224,6 @@ export default function Accounts() {
                 }
                 {modalPage == "ข้อมูลผู้ใช้งาน" &&
                   <div>
-                    <Row style={{alignItems:'center', marginBottom:'14px'}}>
-                      <Col span={7}>หมายเลขพนักงาน :</Col>
-                      <Col>
-                        <Input value={userData.user_id} disabled />
-                      </Col>
-                    </Row>
                     <Row style={{alignItems:'center', marginBottom:'14px'}}>
                       <Col span={7}>ชื่อ :</Col>
                       <Col>

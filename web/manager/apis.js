@@ -22,7 +22,7 @@ export default class apis {
     }
   }
 
-  static async register(name, surname, email, password, tel_number, role) {
+  static async register(name, surname, email, tel_number, role) {
     let res = await axios({
       "method": "post",
       "url": vars["HOST"] + "/web_register",
@@ -30,7 +30,7 @@ export default class apis {
         "name": name, 
         "surname": surname, 
         "email": email, 
-        "password": password, 
+        "password": tel_number, 
         "tel_number": tel_number, 
         "role": role
       }
