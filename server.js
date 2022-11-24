@@ -359,24 +359,25 @@ app.get("/web_prescription_stats", async (req, res) => {
     console.error(err);
     res.status(400).send('Invalid Query Key')
   }
+
   try {
+    // get prescription record
     const prescriptionRecords = await client
       .query("SELECT prescript_id, prescript_no, waiting_queue, patient_name, hospital_unit, submit_date AT TIME ZONE 'ALMST' AS submit_date, login_id FROM prescription_records WHERE $1<=submit_date AND submit_date<=$2", [start_date, end_date])
       .then((payload) => {
         return payload.rows
       });
-
-    for (let i = 0; i < prescriptionRecords.length; i++) {
-      let med_status = await client
-        .query("SELECT medical_id, status FROM medicine_records WHERE prescript_id=$1", [prescriptionRecords[i].prescript_id])
-        .then((payload) => {
-          return payload.rows
-        })
-      prescriptionRecords[i]["med_status"] = med_status
-    }
-
+    
+    // declare neccessary vars and funcs
     let table = []
     let hospital_unit = []
+
+    let i = prescriptionRecords.length
+
+    let cpdata = prescriptionRecords.length
+    let cpnull = 0
+    let cpfalse = 0
+    let cptrue = 0
 
     function parse_status(stat) {
       switch (stat) {
@@ -394,20 +395,36 @@ app.get("/web_prescription_stats", async (req, res) => {
       }
     }
 
-    var cpdata = prescriptionRecords.length
-    var cpnull = 0
-    var cpfalse = 0
-    var cptrue = 0
-    for (const data of prescriptionRecords) {
+    // loop through data
+    while (i--) {
+      let med_status = await client
+        .query("SELECT medical_id, status, submit_date AT TIME ZONE 'ALMST' FROM medicine_records WHERE prescript_id=$1", [prescriptionRecords[i].prescript_id])
+        .then((payload) => {
+          return payload.rows
+        })
+      
+      let cdata = med_status.length
+      let tnow = moment().add(7,"h")
+      let trec = moment(prescriptionRecords[i]["submit_date"])
+      let tdiff = moment.duration(tnow.diff(trec)).asMinutes()
+
+      // check first med record which is added less than 15 mins
+      if (cdata === 1 && med_status[0]["status"] === null && tdiff < 15) {
+        prescriptionRecords.splice(i, 1)
+        continue
+      }
+
+      // manage the rest of datas
       hospital_unit.push({
-        "text":data["hospital_unit"],
-        "value":data["hospital_unit"]
+        "text":prescriptionRecords[i]["hospital_unit"],
+        "value":prescriptionRecords[i]["hospital_unit"]
       })
-      let cdata = data["med_status"].length
+
       let cnull = 0
       let cfalse = 0
       let ctrue = 0
-      for (let o of data["med_status"]) {
+
+      for (let o of med_status) {
         switch (o["status"]) {
           case null:
             cnull++;
@@ -426,12 +443,11 @@ app.get("/web_prescription_stats", async (req, res) => {
         }
       }
 
-      delete data.med_status
       if (cdata !== cnull && cnull > 0) {
         cpnull++;
         table.push({
-          ...data,
-          "submit_date": reformat_date(data["submit_date"]),
+          ...prescriptionRecords[i],
+          "submit_date": reformat_date(prescriptionRecords[i]["submit_date"]),
           "status": parse_status("warning"),
           "num": `${ctrue}/${cdata}`,
           "numPart": ctrue,
@@ -442,8 +458,8 @@ app.get("/web_prescription_stats", async (req, res) => {
       else if (cfalse > 0) {
         cpfalse++;
         table.push({
-          ...data,
-          "submit_date": reformat_date(data["submit_date"]),
+          ...prescriptionRecords[i],
+          "submit_date": reformat_date(prescriptionRecords[i]["submit_date"]),
           "status": parse_status("error"),
           "num": `${ctrue}/${cdata}`,
           "numPart": ctrue,
@@ -454,8 +470,8 @@ app.get("/web_prescription_stats", async (req, res) => {
       else if (ctrue === cdata) {
         cptrue++;
         table.push({
-          ...data,
-          "submit_date": reformat_date(data["submit_date"]),
+          ...prescriptionRecords[i],
+          "submit_date": reformat_date(prescriptionRecords[i]["submit_date"]),
           "status": parse_status("success"),
           "num": `${ctrue}/${cdata}`,
           "numPart": ctrue,
@@ -463,16 +479,29 @@ app.get("/web_prescription_stats", async (req, res) => {
         })
         continue;
       }
+      else if (tdiff > 15) {
+        cpnull++;
+        table.push({
+          ...prescriptionRecords[i],
+          "submit_date": reformat_date(prescriptionRecords[i]["submit_date"]),
+          "status": parse_status("warning"),
+          "num": `${ctrue}/${cdata}`,
+          "numPart": ctrue,
+          "numAll": cdata,
+        })
+        continue;
+      }
       else {
+        console.log(`Prescription ID ${prescriptionRecords[i]["prescript_id"]} is ignored. cdata=${cdata} cnull=${cnull} tdiff=${tdiff}`);
       }
     }
 
-    var uniq = [...new Set(hospital_unit)];
+    var uniq = hospital_unit.filter((v,i,a)=>a.findIndex(v2=>(JSON.stringify(v2) === JSON.stringify(v)))===i)
     
     let summary = {
       success: cptrue*100/cpdata,
-      warning: cpnull*100/cpdata,
-      error: cpfalse*100/cpdata
+      error: cpfalse*100/cpdata,
+      warning: cpnull*100/cpdata
     }
 
     if (isNaN(summary.success) || summary.success == null) {
