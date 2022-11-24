@@ -45,20 +45,7 @@ export default function Stat() {
       value: 0,
     },
   ]);
-  const [tableData, setTableData] = useState([
-    {
-      key: '1',
-      prescript_no: "#1234567",
-      patient_name: 'John Brown',
-      role: 'pat1',
-    },
-    {
-      key: '2',
-      prescript_no: "#1234567",
-      patient_name: 'Jim Green',
-      role: 'pat2',
-    }
-  ])
+  const [tableData, setTableData] = useState([])
 
   const [cardDetails, setCardDetails] = useState({
     waiting_queue: "99",
@@ -126,7 +113,6 @@ export default function Stat() {
       }
     ]
   })
-  const [activeKey, setActiveKey] = useState([])
   const [isModalOpen, setIsModalOpen] = useState(false);
   // const filteredOptions = patientOptions.filter((o) => !selectedItems.includes(o));
 
@@ -204,12 +190,6 @@ export default function Stat() {
 
   async function changeRange(e) {
     if (e != null) {
-      apis.statistic(selectedDate[0], selectedDate[1]).then((res) => {
-        setOptionFilter(res.options)
-        setSummary(res.summary)
-        setChartData(res.chart)
-        setTableData(res.table)
-      })
       setSelectedDate(e)
     }
     else {
@@ -289,13 +269,6 @@ export default function Stat() {
     let startDate = moment()
     let endDate = moment(startDate).add(30, "days")
     setSelectedDate([startDate, endDate])
-
-    apis.statistic(startDate, endDate).then((res) => {
-      setOptionFilter(res.options)
-      setSummary(res.summary)
-      setChartData(res.chart)
-      setTableData(res.table)
-    })
   }, [])
 
   useEffect(() => {
@@ -308,6 +281,17 @@ export default function Stat() {
       setSigninState(true)
     }
   }, [siteToken, router])
+
+  useEffect(() => {
+    if (selectedDate[0] != null) {
+      apis.statistic(selectedDate[0], selectedDate[1]).then((res) => {
+        setOptionFilter(res.options)
+        setSummary(res.summary)
+        setChartData(res.chart)
+        setTableData(res.table)
+      })
+    }
+  }, [selectedDate])
 
   return (
     <div>
@@ -356,7 +340,7 @@ export default function Stat() {
                 </div>
               </div>
               <div>
-                <Table columns={tableColumns} dataSource={tableData} style={{margin: "20px"}} />
+                <Table columns={tableColumns} dataSource={tableData} rowKey="submit_date" style={{margin: "20px"}} />
                 <Modal open={isModalOpen} 
                   onCancel={clickCancel} 
                   onOk={clickOk} 
@@ -420,9 +404,9 @@ export default function Stat() {
                       </div>
                     }
                     {mode === "details" &&
-                      <Collapse defaultActiveKey={activeKey}>
+                      <Collapse defaultActiveKey={[]}>
                         {cardDetails.med_rec.map(function (o) {
-                          return <Panel header={"เวลาตรวจสอบ : "+o['submit_date']} key={o['submit_date']}><div style={{'marginTop':'24px'}}>
+                          return <Panel header={"เวลาตรวจสอบ : "+o['submit_date']} key={o['submit_date'].toString()+o['list'].length}><div style={{'marginTop':'24px'}}>
                             <div className={styles.modalNum}>
                               <div className={styles.modalNumPart} style={{'backgroundColor':'#778472'}}>
                                 <span>ถูกต้อง</span>

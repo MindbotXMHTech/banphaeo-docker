@@ -10,6 +10,7 @@ const io = require('socket.io')(http, {
 });
 const port = 8080;
 const cron = require('node-cron');
+const moment = require("moment")
 
 const client = new Client({
   password: "root",
@@ -143,42 +144,48 @@ app.get("/web_users", async (req, res) => {
 
 app.get("/web_queue_cards", async (req, res) => {
   try {
-    const prescriptionRecords = await client
-      .query("SELECT prescript_id, prescript_no, waiting_queue, submit_date, login_id FROM prescription_records ORDER BY submit_date DESC LIMIT 150")
-      .then((payload) => {
-        return payload.rows
-      });
-
-    for (let i = 0; i < prescriptionRecords.length; i++) {
-      let med_status = await client
-        .query("SELECT medical_id, status, submit_date FROM medicine_records WHERE prescript_id=$1", [prescriptionRecords[i].prescript_id])
-        .then((payload) => {
-          return payload.rows
-        })
-      prescriptionRecords[i]["med_status"] = med_status
-    }
-
     let cards = {
       "success": [],
       "error": [],
       "warning": []
     }
 
-    for (const data of prescriptionRecords) {
-      let cdata = data["med_status"].length
+    const prescriptionRecords = await client
+      .query("SELECT prescript_id, prescript_no, waiting_queue, submit_date AT TIME ZONE 'ALMST' AS submit_date, login_id FROM prescription_records ORDER BY submit_date DESC LIMIT 150")
+      .then((payload) => {
+        return payload.rows
+      });
+
+    let i = prescriptionRecords.length
+    while (i--) {
+      let med_status = await client
+        .query("SELECT medical_id, status, submit_date AT TIME ZONE 'ALMST' FROM medicine_records WHERE prescript_id=$1", [prescriptionRecords[i].prescript_id])
+        .then((payload) => {
+          return payload.rows
+        })
+      
+      let cdata = med_status.length
+      let tnow = moment().add(7,"h")
+      let trec = moment(prescriptionRecords[i]["submit_date"])
+      let tdiff = moment.duration(tnow.diff(trec)).asMinutes()
+      console.log('tnow, trec, tdiff :>> ', tnow, trec, tdiff);
+
+      // check first med record which is added less than 15 mins
+      if (cdata === 1 && med_status[0]["status"] === null && tdiff < 15) {
+        prescriptionRecords.splice(i, 1)
+        continue
+      }
+
+      // add all med record to a related prescription record
+      prescriptionRecords[i]["med_status"] = med_status
+
       let cnull = 0
       let cfalse = 0
       let ctrue = 0
 
-      let tnow = new Date()
-      let tdiff = 0
-
-      for (let o of data["med_status"]) {
+      for (let o of prescriptionRecords[i]["med_status"]) {
         switch (o["status"]) {
           case null:
-            if (cnull + ctrue + cfalse === 0) {
-              tdiff = (tnow-o["submit_date"])/60000
-            }
             cnull++;
             break;
 
@@ -196,12 +203,12 @@ app.get("/web_queue_cards", async (req, res) => {
       }
 
       let cobj = {
-        "pid": data["prescript_id"],
-        "queueId": data["waiting_queue"],
-        "prescriptId": data["prescript_no"],
+        "pid": prescriptionRecords[i]["prescript_id"],
+        "queueId": prescriptionRecords[i]["waiting_queue"],
+        "prescriptId": prescriptionRecords[i]["prescript_no"],
         "numPart": ctrue,
         "numAll": cdata,
-        "dt": reformat_date(data["submit_date"])
+        "dt": reformat_date(prescriptionRecords[i]["submit_date"])
       };
 
       if (cdata !== cnull && cnull > 0) {
@@ -221,7 +228,7 @@ app.get("/web_queue_cards", async (req, res) => {
         continue;
       }
       else {
-        console.log(`Prescription ID ${data["prescript_id"]} is ignored. [tdiff = ${tdiff}]`);
+        console.log(`Prescription ID ${prescriptionRecords[i]["prescript_id"]} is ignored. cdata=${cdata} cnull=${cnull} tdiff=${tdiff}`);
       }
     }
 
@@ -238,7 +245,7 @@ app.get("/web_queue_cards", async (req, res) => {
 app.get("/web_prescription_record/:id", async (req, res) => {
   try {
     let prescriptionRecords = await client
-      .query("SELECT * FROM prescription_records WHERE prescript_id=$1", [req.params.id])
+      .query("SELECT *, submit_date AT TIME ZONE 'ALMST' AS submit_date FROM prescription_records WHERE prescript_id=$1", [req.params.id])
       .then((payload) => {
         if (payload.rowCount > 0) {
           return payload.rows[0]
@@ -355,7 +362,7 @@ app.get("/web_prescription_stats", async (req, res) => {
   }
   try {
     const prescriptionRecords = await client
-      .query("SELECT prescript_id, prescript_no, waiting_queue, patient_name, hospital_unit, submit_date, login_id FROM prescription_records WHERE $1<=submit_date AND submit_date<=$2", [start_date, end_date])
+      .query("SELECT prescript_id, prescript_no, waiting_queue, patient_name, hospital_unit, submit_date AT TIME ZONE 'ALMST' AS submit_date, login_id FROM prescription_records WHERE $1<=submit_date AND submit_date<=$2", [start_date, end_date])
       .then((payload) => {
         return payload.rows
       });

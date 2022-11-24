@@ -9,12 +9,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "server": "^1.0.37",
     "cors": "^2.8.5",
     "express": "^4.17.2",
+    "moment": "^2.29.4",
+    "node-cron": "^3.0.2",
     "pg": "^8.7.1",
-    "socket.io": "^4.5.1",
-    "node-cron": "^3.0.2"
+    "pg-format": "^1.0.4",
+    "server": "^1.0.37",
+    "socket.io": "^4.5.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.15"

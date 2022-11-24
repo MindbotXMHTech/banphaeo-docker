@@ -71,7 +71,7 @@ export default class apis {
       return {"success": true, "msg": "สามารถใช้ email นี้ได้"}
     }
     else {
-      return {"success": false, "msg": "อีเมลนี้เคยลงทะเบียนไปแล้ว กรุณาลอง email อื่น หรือกด \"ลืมรหัสผ่าน\""}
+      return {"success": false, "msg": "อีเมลนี้เคยลงทะเบียนไปแล้ว กรุณาลอง email อื่น"}
     }
   }
 
@@ -151,6 +151,9 @@ export default class apis {
   }
 
   static async statistic(sdate, edate) {
+    sdate.set({h:0,m:0,s:0})
+    edate.set({h:0,m:0,s:0}).add(1,'days')
+    console.log('sdate, edate :>> ', sdate, edate);
     let res = await axios({
       "method": "get",
       "url": vars["HOST"] + "/web_prescription_stats",

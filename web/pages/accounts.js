@@ -4,6 +4,7 @@ import styles from '../styles/index.module.css';
 import { useEffect, useState } from 'react';
 import { UserOutlined, EyeInvisibleOutlined, EyeTwoTone, LoadingOutlined } from '@ant-design/icons';
 import { Button, Input, Col, Row, Select, Alert, message, Table, Modal } from 'antd';
+import MaskedInput from "antd-mask-input";
 import { useRouter } from 'next/router';
 import FooterMain from '../components/footer_main';
 import NavMain from '../components/nav_main';
@@ -11,23 +12,30 @@ import NavSide from '../components/nav_side';
 import LoadingMain from '../components/loading_main';
 import HeaderMain from '../components/header_main';
 import apis from '../manager/apis';
+import utilFuncs from '../manager/utils';
 
 export default function Accounts() {
   const defaultUserData = {
-    "id": null,
-    "name": null,
-    "mobile": null,
-    "type": null,
-    "email": null
+    "id": '',
+    "name": '',
+    "surname": '',
+    "mobile": '',
+    "type": '',
+    "email": ''
   }
   const [signinState, setSigninState] = useState(null);
   const [siteToken, setSiteToken] = useState();
   const [tableData, setTableData] = useState([]);
   const [userData, setUserData] = useState(defaultUserData);
+  const [inpFnameStatus, setInpFnameStatus] = useState('');
+  const [inpLnameStatus, setInpLnameStatus] = useState('');
+  const [inpMobileStatus, setInpMobileStatus] = useState('');
+  const [inpEmailStatus, setInpEmailStatus] = useState('');
   const [modalPage, setModalPage] = useState('ข้อมูลผู้ใช้งาน');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalLoading, setIsModalLoading] = useState(false);
   const [isBtnViewLoading, setIsBtnViewLoading] = useState(false);
+  const [btnAddStatus, setBtnAddStatus] = useState(false)
 
   const modalFooterMode = {
     'ข้อมูลผู้ใช้งาน': [
@@ -42,7 +50,7 @@ export default function Accounts() {
       <Button key="cancelEdit" onClick={clickCancel}>
         ยกเลิก
       </Button>,
-      <Button key="removeUser" type="primary" primary onClick={clickAddUser}>
+      <Button key="removeUser" type="primary" onClick={clickAddUser} disabled={!btnAddStatus}>
         เพิ่มผู้ใช้งาน
       </Button>
     ]
@@ -153,6 +161,24 @@ export default function Accounts() {
     }
   }, [siteToken, router])
 
+  useEffect(() => {
+    if (
+      userData.name.length > 0 &&
+      userData.surname.length > 0 &&
+      userData.email.length > 0 &&
+      userData.mobile.length === 10 &&
+      inpFnameStatus === '' &&
+      inpLnameStatus === '' &&
+      inpEmailStatus === '' &&
+      inpMobileStatus === ''
+    ) {
+      setBtnAddStatus(true)
+    }
+    else {
+      setBtnAddStatus(false)
+    }
+  }, [userData, inpEmailStatus, inpFnameStatus, inpLnameStatus, inpMobileStatus])
+
   return (
     <div>
       <HeaderMain title="Banphaeo Hospital : รายการบัญชีผู้ใช้งาน" />
@@ -168,11 +194,11 @@ export default function Accounts() {
             <div className='container-content'>
               <div style={{display:'flex',flexDirection:'row',justifyContent:'space-between',alignItems:'center'}}>
                 <h1>รายการผู้ใช้</h1>
-                <Button key="cancelEdit" type="primary" primary onClick={clickAdd}>
+                <Button key="cancelEdit" type="primary" onClick={clickAdd}>
                   เพิ่มผู้ใช้งาน
                 </Button>
               </div>
-              <Table columns={tableColumns} dataSource={tableData} style={{margin: "20px"}} />
+              <Table columns={tableColumns} dataSource={tableData} rowKey="name" style={{margin: "20px"}} />
               <Modal title="ข้อมูลผู้ใช้งาน"
                 open={isModalOpen} onCancel={clickCancel} confirmLoading={isModalLoading}
                 footer={modalFooterMode[modalPage]}>
@@ -181,25 +207,73 @@ export default function Accounts() {
                     <Row style={{alignItems:'center', marginBottom:'14px'}}>
                       <Col span={7}>ชื่อ :</Col>
                       <Col>
-                        <Input value={userData.name} onChange={(e) => {setUserData((prev) => ({...prev, "name":e.target.value}))}} />
+                        <Input style={{border:inpFnameStatus}} 
+                          value={userData.name} 
+                          onChange={(e) => {
+                            setUserData((prev) => ({...prev, "name":e.target.value}))
+                            if (e.target.value.length < 1) {
+                              setInpFnameStatus('1px solid red')
+                            }
+                            else {
+                              setInpFnameStatus('')
+                            }
+                          }} />
                       </Col>
                     </Row>
                     <Row style={{alignItems:'center', marginBottom:'14px'}}>
                       <Col span={7}>นามสกุล :</Col>
                       <Col>
-                        <Input value={userData.surname} onChange={(e) => {setUserData((prev) => ({...prev, "surname":e.target.value}))}} />
+                        <Input style={{border:inpFnameStatus}} 
+                          value={userData.surname} 
+                          onChange={(e) => {
+                            setUserData((prev) => ({...prev, "surname":e.target.value}))
+                            if (e.target.value.length < 1) {
+                              setInpLnameStatus('1px solid red')
+                            }
+                            else {
+                              setInpLnameStatus('')
+                            }
+                          }} />
                       </Col>
                     </Row>
                     <Row style={{alignItems:'center', marginBottom:'14px'}}>
                       <Col span={7}>อีเมล :</Col>
                       <Col>
-                        <Input value={userData.email} onChange={(e) => {setUserData((prev) => ({...prev, "email":e.target.value}))}} />
+                        <Input style={{border:inpEmailStatus}} 
+                          value={userData.email} onChange={async (e) => {
+                          setUserData((prev) => ({...prev, "email":e.target.value}))
+                          const isEmailExist = await apis.validateEmail(e.target.value)
+                          if (utilFuncs.validateEmail(e.target.value) == null) {
+                            setInpEmailStatus('1px solid red')
+                          }
+                          else if (!isEmailExist.success) {
+                            message.error(isEmailExist.msg)
+                            setInpEmailStatus('1px solid red')
+                          }
+                          else {
+                            setInpEmailStatus('')
+                          }
+                        }} />
                       </Col>
                     </Row>
                     <Row style={{alignItems:'center', marginBottom:'14px'}}>
                       <Col span={7}>เบอร์โทรศัพท์ :</Col>
                       <Col>
-                        <Input value={userData.tel_number} onChange={(e) => {setUserData((prev) => ({...prev, "mobile":e.target.value}))}} />
+                      <MaskedInput
+                        style={{border:inpMobileStatus}} 
+                        mask={
+                          '000-000-0000'
+                        }
+                        type='text' 
+                        onChange={(e) => {
+                          setUserData((prev) => ({...prev, "mobile":e.unmaskedValue}))
+                          if (e.unmaskedValue == null || e.unmaskedValue.length !== 10) {
+                            setInpMobileStatus('1px solid red')
+                          }
+                          else {
+                            setInpMobileStatus('')
+                          }
+                        }} />
                       </Col>
                     </Row>
                     <Row style={{alignItems:'center', marginBottom:'14px'}}>
@@ -224,19 +298,25 @@ export default function Accounts() {
                 }
                 {modalPage == "ข้อมูลผู้ใช้งาน" &&
                   <div>
-                    <Row style={{alignItems:'center', marginBottom:'14px'}}>
+                    <Row style={{alignItems:'center', marginBottom:'14px', border:inpFnameStatus}}>
                       <Col span={7}>ชื่อ :</Col>
                       <Col>
                         <Input value={userData.name} disabled />
                       </Col>
                     </Row>
-                    <Row style={{alignItems:'center', marginBottom:'14px'}}>
+                    <Row style={{alignItems:'center', marginBottom:'14px', border:inpLnameStatus}}>
+                      <Col span={7}>นามสกุล :</Col>
+                      <Col>
+                        <Input value={userData.surname} disabled />
+                      </Col>
+                    </Row>
+                    <Row style={{alignItems:'center', marginBottom:'14px', border:inpEmailStatus}}>
                       <Col span={7}>อีเมล :</Col>
                       <Col>
                         <Input value={userData.email} disabled />
                       </Col>
                     </Row>
-                    <Row style={{alignItems:'center', marginBottom:'14px'}}>
+                    <Row style={{alignItems:'center', marginBottom:'14px', border:inpMobileStatus}}>
                       <Col span={7}>เบอร์โทรศัพท์ :</Col>
                       <Col>
                         <Input value={userData.tel_number} disabled />
