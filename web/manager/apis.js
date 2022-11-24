@@ -153,7 +153,6 @@ export default class apis {
   static async statistic(sdate, edate) {
     sdate.set({h:0,m:0,s:0})
     edate.set({h:0,m:0,s:0}).add(1,'days')
-    console.log('sdate, edate :>> ', sdate, edate);
     let res = await axios({
       "method": "get",
       "url": vars["HOST"] + "/web_prescription_stats",

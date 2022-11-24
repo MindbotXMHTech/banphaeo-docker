@@ -168,7 +168,6 @@ app.get("/web_queue_cards", async (req, res) => {
       let tnow = moment().add(7,"h")
       let trec = moment(prescriptionRecords[i]["submit_date"])
       let tdiff = moment.duration(tnow.diff(trec)).asMinutes()
-      console.log('tnow, trec, tdiff :>> ', tnow, trec, tdiff);
 
       // check first med record which is added less than 15 mins
       if (cdata === 1 && med_status[0]["status"] === null && tdiff < 15) {
