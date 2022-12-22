@@ -16,12 +16,10 @@ import Barcode from 'react-barcode';
 import { useReactToPrint } from "react-to-print";
 
 const dateFormat = "DD/MM/YYYY"
-// const patientOptions = ['ผู้ป่วยใน 1','ผู้ป่วยใน 2','ผู้ป่วยใน 3']
 
 export default function Stat() {
   const [signinState, setSigninState] = useState(null);
   const [siteToken, setSiteToken] = useState();
-  // const [selectedItems, setSelectedItems] = useState([]);
   const [selectedDate, setSelectedDate] = useState([null, null])
   const [optionFilter, setOptionFilter] = useState([])
   const [mode, setMode] = useState("summary")
@@ -114,7 +112,6 @@ export default function Stat() {
     ]
   })
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // const filteredOptions = patientOptions.filter((o) => !selectedItems.includes(o));
 
   const router = useRouter();
   const { Panel } = Collapse;
@@ -266,8 +263,8 @@ export default function Stat() {
   useEffect(() => {
     setSiteToken(localStorage.getItem("site-token"))
 
-    let startDate = moment()
-    let endDate = moment(startDate).add(30, "days")
+    let endDate = moment()
+    let startDate = moment(endDate).subtract(30, "days")
     setSelectedDate([startDate, endDate])
   }, [])
 
@@ -355,7 +352,7 @@ export default function Stat() {
                   <div ref={printRef} className={styles.containerModal}>
                     <div className={styles.modalTitle}>
                       <span>หมายเลขใบสั่งยา</span>
-                      <span>#{cardDetails.waiting_queue}</span>
+                      <span>#{cardDetails.prescript_no}</span>
                     </div>
                     <Row>
                       <Col span={12}>
@@ -390,9 +387,9 @@ export default function Stat() {
                             <Col span={3}>จำนวน</Col>
                             <Col span={3}>สถานะ</Col>
                           </Row>
-                          {cardDetails.med_rec[cardDetails.med_rec.length-1]["list"].map((med) => (
+                          {cardDetails.med_rec[cardDetails.med_rec.length-1]["list"].map((med, ind) => (
                             <Row key={med["key"]}>
-                              <Col span={3}>{med["key"]}</Col>
+                              <Col span={3}>{ind+1}</Col>
                               <Col span={14}>{med["med_name"]}</Col>
                               <Col span={3}>{med["dose"]}</Col>
                               {med["status"] == true && <Col span={3} className={styles.medStatusTrue}></Col>}
@@ -428,9 +425,9 @@ export default function Stat() {
                                 <Col span={3}>จำนวน</Col>
                                 <Col span={3}>สถานะ</Col>
                               </Row>
-                              {o["list"].map((med) => (
+                              {o["list"].map((med, ind) => (
                                 <Row key={med["key"]}>
-                                  <Col span={3}>{med["key"]}</Col>
+                                  <Col span={3}>{ind+1}</Col>
                                   <Col span={14}>{med["med_name"]}</Col>
                                   <Col span={3}>{med["dose"]}</Col>
                                   {med["status"] == true && <Col span={3} className={styles.medStatusTrue}></Col>}

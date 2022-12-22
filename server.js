@@ -112,7 +112,6 @@ app.get("/web_validate_email", async (req,res) => {
     const results = await client
       .query("SELECT count(1) FROM users WHERE email=$1", [req.query.email])
       .then((payload) => {
-        console.log('count :>> ', payload);
         return payload;
       })
     res.setHeader("Content-Type", "application/json");
@@ -149,15 +148,24 @@ app.get("/web_queue_cards", async (req, res) => {
       "error": [],
       "warning": []
     }
+    let idInCardList = []
 
+    // get all prescription records
     const prescriptionRecords = await client
-      .query("SELECT prescript_id, prescript_no, waiting_queue, submit_date AT TIME ZONE 'ALMST' AS submit_date, login_id FROM prescription_records ORDER BY submit_date DESC LIMIT 150")
+      .query("SELECT prescript_id, prescript_no, waiting_queue, submit_date AT TIME ZONE 'ALMST' AS submit_date, login_id FROM prescription_records ORDER BY submit_date ASC LIMIT 150")
       .then((payload) => {
         return payload.rows
       });
 
+    // loop through all prescription records
     let i = prescriptionRecords.length
     while (i--) {
+
+      // check duplicated prescription record
+      if (idInCardList.includes(prescriptionRecords[i].prescript_no)) continue;
+      else idInCardList.push(prescriptionRecords[i].prescript_no);
+
+      // get all medicine records that matched with prescript_id
       let med_status = await client
         .query("SELECT medical_id, status, submit_date AT TIME ZONE 'ALMST' FROM medicine_records WHERE prescript_id=$1", [prescriptionRecords[i].prescript_id])
         .then((payload) => {
@@ -227,7 +235,7 @@ app.get("/web_queue_cards", async (req, res) => {
         continue;
       }
       else {
-        console.log(`Prescription ID ${prescriptionRecords[i]["prescript_id"]} is ignored. cdata=${cdata} cnull=${cnull} tdiff=${tdiff}`);
+        console.log(`Prescription ID ${prescriptionRecords[i]["prescript_id"]} was ignored. cdata=${cdata} cnull=${cnull} tdiff=${tdiff}`);
       }
     }
 
@@ -243,105 +251,98 @@ app.get("/web_queue_cards", async (req, res) => {
 
 app.get("/web_prescription_record/:id", async (req, res) => {
   try {
+    let card = {}
+
+    // get all prescription records that related to a prescript_id
     let prescriptionRecords = await client
-      .query("SELECT *, submit_date AT TIME ZONE 'ALMST' AS submit_date FROM prescription_records WHERE prescript_id=$1", [req.params.id])
+      .query("SELECT prescript_id, prescript_no, waiting_queue, patient_name, hn, age, hospital_unit, login_id, submit_date AT TIME ZONE 'ALMST' AS submit_date FROM prescription_records WHERE prescript_no = (SELECT prescript_no FROM prescription_records WHERE prescript_id=$1) ORDER BY prescript_id DESC", [req.params.id])
       .then((payload) => {
         if (payload.rowCount > 0) {
-          return payload.rows[0]
+          return payload.rows
         }
         else {
           res.status(200).send(null)
         }
       });
-    prescriptionRecords['submit_date'] = reformat_date(prescriptionRecords['submit_date'])
+    card = prescriptionRecords[0]
+    card['med_rec'] = []
 
-    let med_rec = await client
-      .query("SELECT * FROM medicine_records WHERE prescript_id=$1 ORDER BY medical_id ASC", [prescriptionRecords.prescript_id])
-      .then((payload) => {
-        return payload.rows
+    // loop through all prescription records
+    let i = prescriptionRecords.length
+    while (i--) {
+
+      // get all medicine records that matched with prescript_id
+      let med_status = await client
+        .query("SELECT medical_id, med_name, dose, doctor, status, prescript_id, submit_date AT TIME ZONE 'ALMST' AS submit_date FROM medicine_records WHERE prescript_id=$1 ORDER BY medical_id ASC", [prescriptionRecords[i].prescript_id])
+        .then((payload) => {
+          return payload.rows
+        })
+
+      let cdata = med_status.length
+      let tnow = moment().add(7,"h")
+      let trec = moment(prescriptionRecords[i]["submit_date"])
+      let tdiff = moment.duration(tnow.diff(trec)).asMinutes()
+
+      // check first med record which is added less than 15 mins
+      if (cdata === 1 && med_status[0]["status"] === null && tdiff < 15) {
+        prescriptionRecords.splice(i, 1)
+        continue
+      }
+
+      // count status of med record
+      let cnull = 0
+      let cfalse = 0
+      let ctrue = 0
+
+      for (let o of med_status) {
+        switch (o["status"]) {
+          case null:
+            cnull++;
+            break;
+
+          case true:
+            ctrue++;
+            break;
+
+          case false:
+            cfalse++;
+            break;
+
+          default:
+            break;
+        }
+      } 
+
+      // create med list
+      medlist = []
+      med_status.forEach((val, ind, _) => {
+        medlist.push({
+          "key": val['medical_id'],
+          "med_name": val['med_name'],
+          "dose": val['dose'],
+          "status": val['status']
+        })
+        card['doctor'] = (card['doctor'] !== undefined && card['doctor'].length > 0 && !card['doctor'].includes(val['doctor']))?`${card['doctor']}, ${val['doctor']}`:val['doctor']
       })
 
-    prescriptionRecords['med_rec'] = []
-    let med_list = []
-    let cdata = med_rec.length
-    let cnull = 0
-    let cfalse = 0
-    let ctrue = 0
-
-    for (let o of med_rec) {
-      let foundind = med_list.findIndex(obj => obj.key === o['medical_id']);
-      if (foundind === -1) {
-        med_list.push({
-          key: o['medical_id'],
-          med_name: o['med_name'],
-          dose: o['dose'],
-          status: o['status']
-        })
-      }
-      else {
-        med_list[foundind] = {
-          ...med_list[foundind],
-          med_name: o['med_name'],
-          dose: o['dose'],
-          status: o['status']
-        }
-      }
-      
-      switch (o["status"]) {
-        case null:
-          cnull++;
-          break;
-
-        case true:
-          ctrue++;
-          break;
-
-        case false:
-          cfalse++;
-          break;
-      
-        default:
-          break;
-      }
-
-      if (cnull > 0) {
-        prescriptionRecords['med_rec'].push({
-          "submit_date": reformat_date(o['submit_date']),
-          "ctrue": ctrue,
-          "cfalse": cfalse,
-          "cnull": cnull,
-          "list": JSON.parse(JSON.stringify(med_list.sort((a,b) => a.key - b.key)))
-        })
-      }
-      else if (cfalse > 0) {
-        prescriptionRecords['med_rec'].push({
-          "submit_date": reformat_date(o['submit_date']),
-          "ctrue": ctrue,
-          "cfalse": cfalse,
-          "cnull": cnull,
-          "list": JSON.parse(JSON.stringify(med_list.sort((a,b) => a.key - b.key)))
-        })
-      }
-      else if (ctrue === cdata) {
-        prescriptionRecords['med_rec'].push({
-          "submit_date": reformat_date(o['submit_date']),
-          "ctrue": ctrue,
-          "cfalse": cfalse,
-          "cnull": cnull,
-          "list": JSON.parse(JSON.stringify(med_list.sort((a,b) => a.key - b.key)))
-        })
-      }
-
-      prescriptionRecords['doctor'] = (prescriptionRecords['doctor'] !== undefined && prescriptionRecords['doctor'].length > 0)?`${prescriptionRecords['doctor']}, ${o['doctor']}`:o['doctor']
+      // append med record in card
+      card["med_rec"].push({
+        "submit_date": reformat_date(prescriptionRecords[i]['submit_date']),
+        "ctrue": ctrue,
+        "cfalse": cfalse,
+        "cnull": cnull,
+        "list": medlist
+      })
     }
-
-    prescriptionRecords['call'] = cdata
-    prescriptionRecords['ctrue'] = ctrue
-    prescriptionRecords['cerror'] = cfalse
-    prescriptionRecords['cwarning'] = cnull
+    
+    card['submit_date'] = card['med_rec'][0]['submit_date']
+    card["call"] = card['med_rec'][0]['ctrue'] + card['med_rec'][0]['cfalse'] + card['med_rec'][0]['cnull']
+    card["ctrue"] = card['med_rec'][card['med_rec'].length-1]['ctrue']
+    card["cerror"] = card['med_rec'][card['med_rec'].length-1]['cfalse']
+    card["cwarning"] = card['med_rec'][card['med_rec'].length-1]['cnull']
 
     res.setHeader("Content-Type", "application/json");
-    res.status(200).send(JSON.stringify(prescriptionRecords));
+    res.status(200).send(JSON.stringify(card));
   }
   catch (err) {
     console.error(err);
@@ -361,7 +362,7 @@ app.get("/web_prescription_stats", async (req, res) => {
   }
 
   try {
-    // get prescription record
+    // get all prescription record
     const prescriptionRecords = await client
       .query("SELECT prescript_id, prescript_no, waiting_queue, patient_name, hospital_unit, submit_date AT TIME ZONE 'ALMST' AS submit_date, login_id FROM prescription_records WHERE $1<=submit_date AND submit_date<=$2", [start_date, end_date])
       .then((payload) => {
@@ -371,10 +372,11 @@ app.get("/web_prescription_stats", async (req, res) => {
     // declare neccessary vars and funcs
     let table = []
     let hospital_unit = []
+    let idInCardList = []
 
     let i = prescriptionRecords.length
 
-    let cpdata = prescriptionRecords.length
+    let cpdata = 0
     let cpnull = 0
     let cpfalse = 0
     let cptrue = 0
@@ -397,6 +399,13 @@ app.get("/web_prescription_stats", async (req, res) => {
 
     // loop through data
     while (i--) {
+
+      // check duplicated prescription record
+      if (idInCardList.includes(prescriptionRecords[i].prescript_no)) continue;
+      else idInCardList.push(prescriptionRecords[i].prescript_no);
+      cpdata++
+
+      // get all medicine records that matched with prescript_id
       let med_status = await client
         .query("SELECT medical_id, status, submit_date AT TIME ZONE 'ALMST' FROM medicine_records WHERE prescript_id=$1", [prescriptionRecords[i].prescript_id])
         .then((payload) => {

@@ -35,7 +35,7 @@ export default function Register() {
   const { Option } = Select;
 
   async function clickRegister() {
-    let res = await apis.register(inpFname, inpLname, inpEmail, inpPassword, inpMobile, inpRole)
+    let res = await apis.register(inpFname, inpLname, inpEmail, inpMobile, inpRole)
     if (res.success) {
       message.success(res.msg);
       router.push('/');

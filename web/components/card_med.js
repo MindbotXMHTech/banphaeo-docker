@@ -129,6 +129,7 @@ export default function CardMed(params) {
   }
 
   useEffect(() => {
+    console.log('params :>> ', params);
     switch (params.type) {
       case 'success':
         setColor('#778472')
@@ -192,7 +193,7 @@ export default function CardMed(params) {
           <div ref={printRef} className={styles.containerModal}>
             <div className={styles.modalTitle}>
               <span>หมายเลขใบสั่งยา</span>
-              <span>#{queueId}</span>
+              <span>#{prescriptionId}</span>
             </div>
             <Row>
               <Col span={12}>
