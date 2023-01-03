@@ -304,7 +304,7 @@ export default function NavMain(props) {
                         }}
                         placeholder="Search to Select"
                         onChange={(e) => {setInpProfile((prev) => ({...prev, "role":e}))}}
-                        disabled={inpDisable}
+                        disabled={true}
                       >
                         <Option value="pharmacy">เภสัชกร</Option>
                         <Option value="staff">เจ้าหน้าที่</Option>

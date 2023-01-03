@@ -19,7 +19,7 @@ export default function Accounts() {
     "id": '',
     "name": '',
     "surname": '',
-    "mobile": '',
+    "tel_number": '',
     "type": '',
     "email": ''
   }
@@ -131,7 +131,7 @@ export default function Accounts() {
       userData.name,
       userData.surname,
       userData.email,
-      userData.mobile,
+      userData.tel_number,
       userData.type
     )
     if (res.success) {
@@ -166,7 +166,7 @@ export default function Accounts() {
       userData.name.length > 0 &&
       userData.surname.length > 0 &&
       userData.email.length > 0 &&
-      userData.mobile.length === 10 &&
+      userData.tel_number.length === 10 &&
       inpFnameStatus === '' &&
       inpLnameStatus === '' &&
       inpEmailStatus === '' &&
@@ -266,7 +266,7 @@ export default function Accounts() {
                         }
                         type='text' 
                         onChange={(e) => {
-                          setUserData((prev) => ({...prev, "mobile":e.unmaskedValue}))
+                          setUserData((prev) => ({...prev, "tel_number":e.unmaskedValue}))
                           if (e.unmaskedValue == null || e.unmaskedValue.length !== 10) {
                             setInpMobileStatus('1px solid red')
                           }

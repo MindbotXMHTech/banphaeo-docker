@@ -22,12 +22,12 @@ export default function NavSide(props) {
           <AppstoreOutlined className='nav-side-item' />
         </Link>
       }
-      {props.activeRoute === '/statistic' &&
+      {(props.activeRoute === '/statistic' && role === 'admin') &&
         <Link href="/statistic">
           <LineChartOutlined className='nav-side-item' style={{'color':'white', 'fontSize':'32px'}} />
         </Link>
       }
-      {props.activeRoute !== '/statistic' &&
+      {(props.activeRoute !== '/statistic' && role === 'admin') &&
         <Link href="/statistic">
           <LineChartOutlined className='nav-side-item' />
         </Link>
