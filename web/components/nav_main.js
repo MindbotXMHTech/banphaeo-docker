@@ -37,6 +37,7 @@ export default function NavMain(props) {
   })
   const [inpPassword, setInpPassword] = useState('');
   const [inpProfileStatus, setInpProfileStatus] = useState(defaultInpProfileStatus)
+  const [inpPasswordStatus, setInpPasswordStatus] = useState('')
 
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -212,6 +213,16 @@ export default function NavMain(props) {
     }
   }, [inpProfile, inpProfileStatus])
 
+  useEffect(() => {
+    if (!(inpPassword.length < 6)) {
+      setInpPasswordStatus('')
+      setBtnSavePasswordDisable(false)
+    } else {
+      setInpPasswordStatus('1px solid red')
+      setBtnSavePasswordDisable(true)
+    }
+  }, [inpPassword])
+
   return (
     <div className='nav-main'>
       <strong className='nav-main-title'>Banphaeo Hospital</strong>
@@ -336,8 +347,13 @@ export default function NavMain(props) {
                     </Col>
                   </Row>
                 </div>
-                <div style={{'flex':1}}>
+                <div style={{'flex':1, 'justifyContent':'center', 'textAlign':'center'}}>
                   <QRCode size={96} {...{'width':1,'height':50}} value={inpProfile.user_id.toString()} />
+                  <p>
+                    <span>QR Code</span><br/>
+                    <span>สำหรับแสกน</span><br/>
+                    <span>เครื่องตรวจสอบยา</span>
+                  </p>
                 </div>
               </div>
             }
@@ -346,7 +362,7 @@ export default function NavMain(props) {
                 <Row style={{alignItems:'center', marginBottom:'14px'}}>
                   <Col span={7}>รหัสผ่านใหม่ : </Col>
                   <Col>
-                    <Input type='text' placeholder="รหัสผ่านใหม่" onChange={(e) => {setInpPassword(e.target.value)}}/>
+                    <Input style={{'border':inpPasswordStatus}} type='text' placeholder="รหัสผ่าน 6 ตัวอักษรขึ้นไป" onChange={(e) => {setInpPassword(e.target.value)}}/>
                   </Col>
                 </Row>
               </div>

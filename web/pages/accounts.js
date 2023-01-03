@@ -20,7 +20,7 @@ export default function Accounts() {
     "name": '',
     "surname": '',
     "tel_number": '',
-    "type": '',
+    "type": 'pharmacy',
     "email": ''
   }
   const [signinState, setSigninState] = useState(null);
@@ -102,7 +102,6 @@ export default function Accounts() {
   ];
 
   async function clickAdd() {
-    setUserData((prev) => ({...prev, "type":"pharmacy"}))
     setModalPage("เพิ่มผู้ใช้งาน");
     setIsModalOpen(true);
   }
@@ -116,6 +115,7 @@ export default function Accounts() {
     setIsModalLoading(true)
     let res = await apis.removeUser(userData.user_id)
     if (res.success) {
+      apis.userRows().then((res) => { setTableData(res) })
       message.success(res.msg)
     }
     else {
@@ -149,6 +149,12 @@ export default function Accounts() {
     setSiteToken(localStorage.getItem("site-token"))
     apis.userRows().then((res) => { setTableData(res) })
   }, [])
+
+  useEffect(() => {
+    if (!isModalOpen) {
+      setUserData(defaultUserData)
+    }
+  }, [isModalOpen])
 
   useEffect(() => {
     if (siteToken === null) {
@@ -275,6 +281,7 @@ export default function Accounts() {
                           }
                         }} />
                       </Col>
+                      <Col style={{'color':'red'}}>&nbsp;&nbsp;&nbsp;*ใช้สำหรับรหัสผ่าน</Col>
                     </Row>
                     <Row style={{alignItems:'center', marginBottom:'14px'}}>
                       <Col span={7}>ผู้จัดยา : </Col>
