@@ -2,8 +2,7 @@
 
 ### First Step
 
-edit `NEXT_PUBLIC_HOST` and `NEXT_PUBLIC_SOCKET_URI` in `/web/store/vars.json`
-
+edit `NEXT_PUBLIC_HOST`, `NEXT_PUBLIC_SOCKET_URI` and `VALIDATE_MINS` (optional for delay checking medicines update time) in `.env`
 
 ### Second
 
