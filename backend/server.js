@@ -184,11 +184,11 @@ app.get("/web_queue_cards", async (req, res) => {
       while (i2--) {
         if (med_status[i2]["status"] === null && tdiff < validate_mins) {
           prescriptionRecords.splice(i, 1)
-          i2 = -1
+          i2 = -99
           break
         }
       }
-      if (!i2) {
+      if (i2 === -99) {
         continue
       }
 
@@ -297,11 +297,11 @@ app.get("/web_prescription_record/:id", async (req, res) => {
       while (i2--) {
         if (med_status[i2]["status"] === null && tdiff < validate_mins) {
           prescriptionRecords.splice(i, 1)
-          i2 = -1
+          i2 = -99
           break
         }
       }
-      if (!i2) {
+      if (i2 === -99) {
         continue
       }
 
@@ -438,11 +438,11 @@ app.get("/web_prescription_stats", async (req, res) => {
       while (i2--) {
         if (med_status[i2]["status"] === null && tdiff < validate_mins) {
           prescriptionRecords.splice(i, 1)
-          i2 = -1
+          i2 = -99
           break
         }
       }
-      if (!i2) {
+      if (i2 === -99) {
         continue
       }
 
