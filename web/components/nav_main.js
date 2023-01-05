@@ -1,6 +1,6 @@
 import { UserOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { Button, Col, Input, message, Modal, Row, Select } from 'antd';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import Router from 'next/router';
 import QRCode from 'react-qr-code';
 import apis from '../manager/apis';
@@ -76,6 +76,24 @@ export default function NavMain(props) {
   const { confirm } = Modal;
   const { Option } = Select;
 
+  const cellphoneMask = '(000) 000-0000';
+  const phoneMask = '(00) 000-0000';
+
+  // always memoize dynamic masks
+  const mask = useMemo(
+    () => [
+      {
+        mask: cellphoneMask,
+        lazy: false,
+      },
+      {
+        mask: phoneMask,
+        lazy: false,
+      },
+    ],
+    []
+  );
+
   async function clickModal () {
     let uid = localStorage.getItem("user_id")
     if (uid == undefined || uid == null || uid == "") {
@@ -89,7 +107,6 @@ export default function NavMain(props) {
         setOpen(true);
       })
     }
-    setOpen(true);
   };
 
   // handle modal's general event
@@ -204,7 +221,7 @@ export default function NavMain(props) {
       inpProfileStatus.email !== '1px solid red' &&
       inpProfile.email.length !== 0 && 
       inpProfile.surname.length !== 0 &&
-      inpProfile.tel_number.length === 10 &&
+      inpProfile.tel_number.length >= 9 &&
       inpProfile.role.length !== 0
     ) {
       setBtnSaveProfileDisable(false)
@@ -284,15 +301,19 @@ export default function NavMain(props) {
                     <Col>
                       <MaskedInput
                         style={{border:inpProfileStatus.tel_number}} 
-                        mask={
-                          '000-000-0000'
-                        }
+                        mask={mask}
+                        maskOptions={{
+                          dispatch: function (appended, dynamicMasked) {
+                            const isCellPhone = (dynamicMasked.unmaskedValue[1] === '6') || (dynamicMasked.unmaskedValue[1] === '8') || (dynamicMasked.unmaskedValue[1] === '9');
+                            return dynamicMasked.compiledMasks[isCellPhone ? 0 : 1];
+                          },
+                        }}
                         type='text' 
                         placeholder="เบอร์โทรศัพท์" 
                         value={inpProfile.tel_number} 
                         onChange={(e) => {
                           setInpProfile((prev) => ({...prev, "tel_number":e.unmaskedValue}))
-                          if (e.unmaskedValue == null || e.unmaskedValue.length !== 10) {
+                          if (e.unmaskedValue == null || e.unmaskedValue.length < 9) {
                             setInpProfileStatus((prev) => ({...prev, "tel_number":'1px solid red'}))
                           }
                           else {
@@ -351,7 +372,7 @@ export default function NavMain(props) {
                   <QRCode size={96} {...{'width':1,'height':50}} value={inpProfile.user_id.toString()} />
                   <p>
                     <span>QR Code</span><br/>
-                    <span>สำหรับแสกน</span><br/>
+                    <span>สำหรับสแกน</span><br/>
                     <span>เครื่องตรวจสอบยา</span>
                   </p>
                 </div>

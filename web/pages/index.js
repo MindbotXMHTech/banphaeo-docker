@@ -15,10 +15,9 @@ import HeaderMain from '../components/header_main';
 import CardMed from '../components/card_med';
 import apis from '../manager/apis';
 import utilFuncs from '../manager/utils';
-import vars from '../store/vars'
 
 export default function Main() {
-  const socket = io(vars["SOCKET_URI"], {reconnectionDelayMax: 1000})
+  const socket = io(process.env.NEXT_PUBLIC_SOCKET_URI, {reconnectionDelayMax: 1000})
   const [signinState, setSigninState] = useState(null)
   const [siteToken, setSiteToken] = useState(null)
   const [inpEmail, setInpEmail] = useState()

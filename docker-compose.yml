@@ -4,7 +4,11 @@ services:
   # When Docker Compose starts this container it will automatically
   # use the Dockerfile in the directory to configure it
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VALIDATE_MINS: ${VALIDATE_MINS}
     container_name: server_api
     depends_on:
       # Our app does not work without our database
@@ -63,8 +67,8 @@ services:
       context: ./web
       dockerfile: Dockerfile
       args:
-        ENV_VARIABLE: ${ENV_VARIABLE}
-        NEXT_PUBLIC_ENV_VARIABLE: ${NEXT_PUBLIC_ENV_VARIABLE}
+        NEXT_PUBLIC_HOST: ${NEXT_PUBLIC_HOST}
+        NEXT_PUBLIC_SOCKET_URI: ${NEXT_PUBLIC_SOCKET_URI}
     restart: always
     ports:
       - 3000:3000

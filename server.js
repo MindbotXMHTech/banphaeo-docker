@@ -8,16 +8,18 @@ const io = require('socket.io')(http, {
     origin:'*'
   }
 });
-const port = 8080;
 const cron = require('node-cron');
 const moment = require("moment")
+
+const port = 8080;
+// const validate_mins = process.env.VALIDATE_MINS;
+const validate_mins = 5;
 
 const client = new Client({
   password: "root",
   user: "root",
   host: "postgres",
 });
-
 
 // Functions
 function reformat_date(mydt) {
@@ -177,9 +179,16 @@ app.get("/web_queue_cards", async (req, res) => {
       let trec = moment(prescriptionRecords[i]["submit_date"])
       let tdiff = moment.duration(tnow.diff(trec)).asMinutes()
 
-      // check first med record which is added less than 15 mins
-      if (cdata === 1 && med_status[0]["status"] === null && tdiff < 15) {
-        prescriptionRecords.splice(i, 1)
+      // check first med record which is added less than validate_mins mins
+      let i2 = med_status.length
+      while (i2--) {
+        if (med_status[i2]["status"] === null && tdiff < validate_mins) {
+          prescriptionRecords.splice(i, 1)
+          i2 = -1
+          break
+        }
+      }
+      if (!i2) {
         continue
       }
 
@@ -230,7 +239,7 @@ app.get("/web_queue_cards", async (req, res) => {
         cards["success"].push(cobj);
         continue;
       }
-      else if (tdiff > 15) {
+      else if (tdiff > validate_mins) {
         cards["warning"].push(cobj);
         continue;
       }
@@ -283,9 +292,16 @@ app.get("/web_prescription_record/:id", async (req, res) => {
       let trec = moment(prescriptionRecords[i]["submit_date"])
       let tdiff = moment.duration(tnow.diff(trec)).asMinutes()
 
-      // check first med record which is added less than 15 mins
-      if (cdata === 1 && med_status[0]["status"] === null && tdiff < 15) {
-        prescriptionRecords.splice(i, 1)
+      // check first med record which is added less than validate_mins mins
+      let i2 = med_status.length
+      while (i2--) {
+        if (med_status[i2]["status"] === null && tdiff < validate_mins) {
+          prescriptionRecords.splice(i, 1)
+          i2 = -1
+          break
+        }
+      }
+      if (!i2) {
         continue
       }
 
@@ -417,9 +433,16 @@ app.get("/web_prescription_stats", async (req, res) => {
       let trec = moment(prescriptionRecords[i]["submit_date"])
       let tdiff = moment.duration(tnow.diff(trec)).asMinutes()
 
-      // check first med record which is added less than 15 mins
-      if (cdata === 1 && med_status[0]["status"] === null && tdiff < 15) {
-        prescriptionRecords.splice(i, 1)
+      // check first med record which is added less than validate_mins mins
+      let i2 = med_status.length
+      while (i2--) {
+        if (med_status[i2]["status"] === null && tdiff < validate_mins) {
+          prescriptionRecords.splice(i, 1)
+          i2 = -1
+          break
+        }
+      }
+      if (!i2) {
         continue
       }
 
@@ -488,7 +511,7 @@ app.get("/web_prescription_stats", async (req, res) => {
         })
         continue;
       }
-      else if (tdiff > 15) {
+      else if (tdiff > validate_mins) {
         cpnull++;
         table.push({
           ...prescriptionRecords[i],

@@ -9,6 +9,9 @@ WORKDIR /usr/src/app
 # copying packages first helps take advantage of docker layers
 COPY package*.json ./
 
+ARG VALIDATE_MINS
+ENV VALIDATE_MINS=${VALIDATE_MINS}
+
 RUN npm install
 RUN npm install pg-format
 # If you are building your code for production

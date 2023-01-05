@@ -129,7 +129,6 @@ export default function CardMed(params) {
   }
 
   useEffect(() => {
-    console.log('params :>> ', params);
     switch (params.type) {
       case 'success':
         setColor('#778472')

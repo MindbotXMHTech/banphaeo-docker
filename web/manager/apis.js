@@ -1,5 +1,6 @@
 import axios from "axios"
-import vars from '../store/vars';
+
+const host = process.env.NEXT_PUBLIC_HOST
 
 export default class apis {
   constructor() {}
@@ -7,7 +8,7 @@ export default class apis {
   static async login(email, password) {
     let res = await axios({
       "method": "post",
-      "url": vars["HOST"] + "/web_login",
+      "url": host + "/web_login",
       "data": {
         "email": email,
         "password": password
@@ -25,7 +26,7 @@ export default class apis {
   static async register(name, surname, email, tel_number, role) {
     let res = await axios({
       "method": "post",
-      "url": vars["HOST"] + "/web_register",
+      "url": host + "/web_register",
       "params": {
         "name": name, 
         "surname": surname, 
@@ -54,7 +55,7 @@ export default class apis {
   static async validateEmail(email) {
     let res = await axios({
       "method": "get",
-      "url": vars["HOST"] + "/web_validate_email",
+      "url": host + "/web_validate_email",
       "params": {
         "email": email
       }
@@ -78,7 +79,7 @@ export default class apis {
   static async resetPassword(id, newpassword) {
     let res = await axios({
       "method": "put",
-      "url": vars["HOST"] + "/web_user/" + id + "/password",
+      "url": host + "/web_user/" + id + "/password",
       "params": {
         "data": newpassword
       }
@@ -95,7 +96,7 @@ export default class apis {
   static async editProfile(id, name, surname, email, tel_number, role) {
     let res = await axios({
       "method": "put",
-      "url": vars["HOST"] + "/web_user/" + id + "/profile",
+      "url": host + "/web_user/" + id + "/profile",
       "params": {
         "name": name, 
         "surname": surname, 
@@ -110,7 +111,7 @@ export default class apis {
   static async prescriptionCards(loginId) {
     let res = await axios({
       "method": "get",
-      "url": vars["HOST"] + "/web_queue_cards",
+      "url": host + "/web_queue_cards",
       "headers": {
         "login_id": loginId
       }
@@ -121,7 +122,7 @@ export default class apis {
   static async prescriptionDetails(id) {
     let res = await axios({
       "method": "get",
-      "url": vars["HOST"] + "/web_prescription_record/" + id
+      "url": host + "/web_prescription_record/" + id
     })
     return res.data
   }
@@ -129,7 +130,7 @@ export default class apis {
   static async userRows() {
     let res = await axios({
       "method": "get",
-      "url": vars["HOST"] + "/web_user_rows"
+      "url": host + "/web_user_rows"
     })
     return res.data
   }
@@ -137,7 +138,7 @@ export default class apis {
   static async removeUser(id) {
     let res = await axios({
       "method": "delete",
-      "url": vars["HOST"] + "/web_user/" + id
+      "url": host + "/web_user/" + id
     })
     return res.data
   }
@@ -145,7 +146,7 @@ export default class apis {
   static async user(id) {
     let res = await axios({
       "method": "get",
-      "url": vars["HOST"] + "/web_user/" + id
+      "url": host + "/web_user/" + id
     })
     return res.data
   }
@@ -155,7 +156,7 @@ export default class apis {
     edate.set({h:0,m:0,s:0}).add(1,'days')
     let res = await axios({
       "method": "get",
-      "url": vars["HOST"] + "/web_prescription_stats",
+      "url": host + "/web_prescription_stats",
       "params": {
         "start_date": sdate,
         "end_date": edate

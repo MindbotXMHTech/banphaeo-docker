@@ -22,10 +22,11 @@ COPY next.config.js .
 
 # Environment variables must be present at build time
 # https://github.com/vercel/next.js/discussions/14030
-ARG ENV_VARIABLE
-ENV ENV_VARIABLE=${ENV_VARIABLE}
-ARG NEXT_PUBLIC_ENV_VARIABLE
-ENV NEXT_PUBLIC_ENV_VARIABLE=${NEXT_PUBLIC_ENV_VARIABLE}
+
+ARG NEXT_PUBLIC_HOST
+ENV NEXT_PUBLIC_HOST=${NEXT_PUBLIC_HOST}
+ARG NEXT_PUBLIC_SOCKET_URI
+ENV NEXT_PUBLIC_SOCKET_URI=${NEXT_PUBLIC_SOCKET_URI}
 
 # Uncomment the following line to disable telemetry at build time
 # ENV NEXT_TELEMETRY_DISABLED 1

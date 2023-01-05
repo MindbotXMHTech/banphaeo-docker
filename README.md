@@ -2,7 +2,8 @@
 
 ### First Step
 
-edit `HOST` and `SOCKET_URI` in `/web/store/vars.json`
+edit `NEXT_PUBLIC_HOST` and `NEXT_PUBLIC_SOCKET_URI` in `/web/store/vars.json`
+
 
 ### Second
 
