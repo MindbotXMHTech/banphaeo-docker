@@ -83,7 +83,7 @@ export default function Register() {
       <HeaderMain title="สมัครสมาชิก" />
 
       <main>
-        <NavMain/>
+        <NavMain signinState={false}/>
         {signinState === null &&
           <LoadingMain/>
         }

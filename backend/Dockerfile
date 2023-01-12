@@ -9,8 +9,14 @@ WORKDIR /usr/src/app
 # copying packages first helps take advantage of docker layers
 COPY package*.json ./
 
+ARG DOMAIN
+ENV DOMAIN=${DOMAIN}
+ARG PORT
+ENV PORT=${PORT}
 ARG VALIDATE_MINS
 ENV VALIDATE_MINS=${VALIDATE_MINS}
+ARG JWT_SECRET
+ENV JWT_SECRET=${JWT_SECRET}
 
 RUN npm install
 RUN npm install pg-format

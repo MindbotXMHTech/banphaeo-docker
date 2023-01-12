@@ -8,12 +8,17 @@ services:
       context: ./backend
       dockerfile: Dockerfile
       args:
+        DOMAIN: ${DOMAIN}
+        PORT: ${PORT}
         VALIDATE_MINS: ${VALIDATE_MINS}
+        JWT_SECRET: ${JWT_SECRET}
     container_name: server_api
     depends_on:
       # Our app does not work without our database
       # so this ensures our database is loaded first
-      - postgres
+      postgres:
+        condition: service_healthy
+
     ports:
       - "8080:8080"
     volumes:
@@ -24,13 +29,14 @@ services:
       # https://stackoverflow.com/a/32785014
       - /usr/src/app/node_modules
 
+
   # This is the configuration for our PostgreSQL database container
   # Note the `postgres` name is important, in out Node app when we refer
   # to  `host: "postgres"` that value is mapped on the network to the 
   # address of this container.
   postgres:
     image: postgres:14.1-alpine
-    container_name: postgres-db
+    container_name: postgres
     restart: always
     environment:
       # You can set the value of environment variables
@@ -43,11 +49,20 @@ services:
     ports:
       # Standard port for PostgreSQL databases
       - "5432:5432"
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
     volumes:
       # When the PostgresSQL container is started it will run any scripts
       # provided in the `docker-entrypoint-initdb.d` directory, this connects
       # our seed file to that directory so that it gets run
-      - ./database-seed.sql:/docker-entrypoint-initdb.d/database-seed.sql
+      # copy the sql script to create tables
+      - ./postgres_db/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+      # copy the sql script to fill tables
+      - ./postgres_db/fill_tables.sql:/docker-entrypoint-initdb.d/fill_tables.sql
 
   # PostgreSQL pgAdmin panel accessible at http://localhost:16543/
   pgadmin-compose:
@@ -59,7 +74,10 @@ services:
     ports:
       - "16543:80"
     depends_on:
-      - postgres
+    # Our app does not work without our database
+    # so this ensures our database is loaded first
+      postgres:
+        condition: service_healthy
 
   banphaeo-web:
     container_name: banphaeo-web
@@ -69,6 +87,11 @@ services:
       args:
         NEXT_PUBLIC_HOST: ${NEXT_PUBLIC_HOST}
         NEXT_PUBLIC_SOCKET_URI: ${NEXT_PUBLIC_SOCKET_URI}
+    depends_on:
+    # Our app does not work without our database
+    # so this ensures our database is loaded first
+      postgres:
+        condition: service_healthy
     restart: always
     ports:
       - 3000:3000

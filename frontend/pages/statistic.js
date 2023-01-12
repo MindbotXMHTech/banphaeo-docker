@@ -11,9 +11,9 @@ import NavSide from '../components/nav_side';
 import LoadingMain from '../components/loading_main';
 import HeaderMain from '../components/header_main';
 import moment from 'moment';
-import apis from '../manager/apis';
 import Barcode from 'react-barcode';
 import { useReactToPrint } from "react-to-print";
+import apis from '../manager/apis';
 
 const dateFormat = "DD/MM/YYYY"
 
@@ -175,7 +175,7 @@ export default function Stat() {
   })
 
   async function clickView(e) {
-    apis.prescriptionDetails(e.prescript_id).then((res) => {
+    apis.prescriptionDetails(siteToken, e.prescript_id).then((res) => {
       if (res !== null) {
         setCardDetails(() => ({
           ...res
@@ -262,10 +262,6 @@ export default function Stat() {
 
   useEffect(() => {
     setSiteToken(localStorage.getItem("site-token"))
-
-    let endDate = moment()
-    let startDate = moment(endDate).subtract(30, "days")
-    setSelectedDate([startDate, endDate])
   }, [])
 
   useEffect(() => {
@@ -274,14 +270,26 @@ export default function Stat() {
       router.push('/')
     }
     else {
-      // TODO validate token (get /me)
-      setSigninState(true)
+      apis.me(siteToken).then((res) => {
+        if (!res.success && signinState) {
+          localStorage.clear()
+          router.push('/')
+          setSigninState(false)
+        }
+        else {
+          let endDate = moment()
+          let startDate = moment(endDate).subtract(30, "days")
+          setSelectedDate([startDate, endDate])
+          setSigninState(true)
+        }
+      })
     }
   }, [siteToken, router])
 
   useEffect(() => {
-    if (selectedDate[0] != null) {
-      apis.statistic(selectedDate[0], selectedDate[1]).then((res) => {
+    if (selectedDate[0] != null && selectedDate[1] != null) {
+      console.log('selectedDate :>> ', selectedDate);
+      apis.statistic(siteToken, selectedDate[0], selectedDate[1]).then((res) => {
         setOptionFilter(res.options)
         setSummary(res.summary)
         setChartData(res.chart)
@@ -295,7 +303,7 @@ export default function Stat() {
       <HeaderMain title="Banphaeo Hospital : ข้อมูลสถิติ" />
 
       <main>
-        <NavMain signinState={signinState} />
+        <NavMain token={siteToken} signinState={signinState} />
         {signinState === null &&
           <LoadingMain/>
         }

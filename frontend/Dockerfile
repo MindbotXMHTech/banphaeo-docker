@@ -16,7 +16,6 @@ COPY components ./components
 COPY manager ./manager
 COPY pages ./pages
 COPY public ./public
-COPY store ./store
 COPY styles ./styles
 COPY next.config.js .
 

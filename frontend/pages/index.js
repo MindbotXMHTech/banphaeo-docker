@@ -14,10 +14,9 @@ import NavSide from '../components/nav_side';
 import HeaderMain from '../components/header_main';
 import CardMed from '../components/card_med';
 import apis from '../manager/apis';
-import utilFuncs from '../manager/utils';
 
 export default function Main() {
-  const socket = io(process.env.NEXT_PUBLIC_SOCKET_URI, {reconnectionDelayMax: 1000})
+  const socket = io(process.env.NEXT_PUBLIC_SOCKET_URI, {reconnectionDelayMax: 10000, transports: ["websocket"]})
   const [signinState, setSigninState] = useState(null)
   const [siteToken, setSiteToken] = useState(null)
   const [inpEmail, setInpEmail] = useState()
@@ -28,21 +27,21 @@ export default function Main() {
     "warning": []
   })
 
-  async function setUpCard() {
-    // TODO add login_id
-    let prescriptionRecords = await apis.prescriptionCards("some id")
-
-    setData(prescriptionRecords)
+  function setUpCard() {
+    let token = localStorage.getItem('site-token')
+    apis.prescriptionCards(token).then((prescriptionRecords) => {
+      setData(prescriptionRecords)
+    })
   }
 
   useEffect(() => {
+    setSiteToken(localStorage.getItem("site-token"))
+
     socket.on("connect", () => { console.log("Connected:", socket.id) });
     socket.on("response", () => { console.log("Response:", socket.id) });
     socket.on("update", () => { 
       setUpCard();
     });
-
-    setSiteToken(localStorage.getItem("site-token"))
   }, [])
 
   useEffect(() => {
@@ -50,18 +49,17 @@ export default function Main() {
       setSigninState(false)
     }
     else {
-      let uid = localStorage.getItem("user_id")
-      utilFuncs.validateLogin(uid).then((res) => {
-        if (res != false) {
-          setSiteToken(res)
-        }
-        else {
+      apis.me(siteToken).then((res) => {
+        if (!res.success && signinState) {
           localStorage.clear()
           Router.reload(window.location.pathname)
+          setSigninState(false)
+        }
+        else {
+          setUpCard()
+          setSigninState(true)
         }
       })
-      setUpCard()
-      setSigninState(true)
     }
   }, [siteToken])
 
@@ -70,7 +68,7 @@ export default function Main() {
       <HeaderMain title="Banphaeo Hospital" />
 
       <main>
-        <NavMain signinState={signinState}/>
+        <NavMain token={siteToken} signinState={signinState}/>
         {signinState === null &&
           <LoadingMain/>
         }
@@ -86,7 +84,8 @@ export default function Main() {
                   </div>
                   {
                     data["success"].map(function (d) {
-                      return <CardMed key={d["pid"]}
+                      return <CardMed token={siteToken} 
+                        key={d["pid"]}
                         prescript_id={d["pid"]}
                         type="success" 
                         queueId={d["queueId"]} 
@@ -104,7 +103,8 @@ export default function Main() {
                   </div>
                   {
                     data["error"].map(function (d) {
-                      return <CardMed key={d["pid"]} 
+                      return <CardMed token={siteToken}
+                        key={d["pid"]} 
                         prescript_id={d["pid"]}
                         type="error" 
                         queueId={d["queueId"]} 
@@ -122,7 +122,8 @@ export default function Main() {
                   </div>
                   {
                     data["warning"].map(function (d) {
-                      return <CardMed key={d["pid"]} 
+                      return <CardMed token={siteToken}
+                        key={d["pid"]} 
                         prescript_id={d["pid"]}
                         type="warning" 
                         queueId={d["queueId"]} 
@@ -155,7 +156,7 @@ export default function Main() {
                 if (res.success) {
                   message.success(res.msg);
             
-                  let token = "mock"
+                  let token = res.token
                   localStorage.setItem("site-token", token)
                   localStorage.setItem("user_id", res.profile.user_id)
                   localStorage.setItem("name", res.profile.name)

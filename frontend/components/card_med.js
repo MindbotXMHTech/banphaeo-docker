@@ -6,6 +6,7 @@ import { useReactToPrint } from "react-to-print";
 import apis from "../manager/apis";
 
 export default function CardMed(params) {
+  const [siteToken, setSiteToken] = useState(null)
   const [mode, setMode] = useState("summary")
   const [txtBtnMode, setTxtBtnMode] = useState("ดูประวัติ")
   const [color, setColor] = useState()
@@ -97,7 +98,7 @@ export default function CardMed(params) {
 
   function clickMore() {
     setIsBtnMoreLoading(true)
-    apis.prescriptionDetails(params.prescript_id).then((res) => {
+    apis.prescriptionDetails(siteToken, params.prescript_id).then((res) => {
       if (res !== null) {
         setCardDetails((prev) => ({
           ...res
@@ -129,6 +130,7 @@ export default function CardMed(params) {
   }
 
   useEffect(() => {
+    setSiteToken(params.token)
     switch (params.type) {
       case 'success':
         setColor('#778472')

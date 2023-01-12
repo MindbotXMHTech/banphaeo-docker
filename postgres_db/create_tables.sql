@@ -7,6 +7,7 @@ CREATE TABLE users
     password            text not null,
     tel_number          text not null,
     role                text not null,
+    otp                 json NOT NULL DEFAULT '{}'::json,
     registration_date   TIMESTAMP WITH TIME ZONE DEFAULT now(),
 
     constraint pk_users primary key (user_id)

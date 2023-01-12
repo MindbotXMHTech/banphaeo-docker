@@ -7,7 +7,8 @@ import apis from '../manager/apis';
 import utilFuncs from '../manager/utils';
 import { MaskedInput } from 'antd-mask-input';
 
-export default function NavMain(props) {
+export default function NavMain(params) {
+  const [siteToken, setSiteToken] = useState(null)
   const defaultInpProfileStatus = {
     "email": null,
     "name": null,
@@ -101,7 +102,7 @@ export default function NavMain(props) {
       Router.reload(window.location.pathname)
     }
     else {
-      await apis.user(uid).then((res) => {
+      await apis.user(siteToken, uid).then((res) => {
         setInpProfile(res)
         setInpProfileFix(res)
         setOpen(true);
@@ -168,7 +169,7 @@ export default function NavMain(props) {
   async function clickSaveProfile() {
     setLoading(true);
     setBtnDisable(true);
-    let res = await apis.editProfile(inpProfile.user_id, inpProfile.name, inpProfile.surname, inpProfile.email, inpProfile.tel_number, inpProfile.role)
+    let res = await apis.editProfile(siteToken, inpProfile.user_id, inpProfile.name, inpProfile.surname, inpProfile.email, inpProfile.tel_number, inpProfile.role)
     if (res.success) {
       setLoading(false);
       setOpen(false);
@@ -192,7 +193,7 @@ export default function NavMain(props) {
   async function clickSavePassword() {
     setLoading(true);
     setInpDisable(true);
-    let res = await apis.resetPassword(inpProfile.user_id, inpPassword)
+    let res = await apis.resetPassword(siteToken, inpProfile.user_id, inpPassword)
     if (res.success) {
       setLoading(false);
       setOpen(false);
@@ -206,6 +207,10 @@ export default function NavMain(props) {
       message.error(res.msg)
     }
   }
+
+  useEffect(() => {
+    setSiteToken(params.token)
+  }, [params])
 
   useEffect(() => {
     if (!open) {
@@ -243,7 +248,7 @@ export default function NavMain(props) {
   return (
     <div className='nav-main'>
       <strong className='nav-main-title'>Banphaeo Hospital</strong>
-      {props.signinState === true &&
+      {params.signinState === true &&
         <div>
           <Button type="default" shape="circle" icon={<UserOutlined />} onClick={clickModal} />
           <Modal

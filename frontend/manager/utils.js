@@ -29,31 +29,6 @@ class utilFuncs {
       return {'year':y,'month':m,'day':d};
   }
 
-  static async validateLogin (uid) {
-    if (uid == undefined || uid == null || uid =="") {
-      return false
-    }
-    else {
-      apis.user(uid).then((res) => {
-        if (res == null) {
-          localStorage.clear()
-          return false
-        }
-        else {
-          let token = "mock";
-          localStorage.setItem("site-token", token)
-          localStorage.setItem("user_id", res.user_id)
-          localStorage.setItem("name", res.name)
-          localStorage.setItem("surname", res.surname)
-          localStorage.setItem("email", res.email)
-          localStorage.setItem("tel_number", res.tel_number)
-          localStorage.setItem("role", res.role)
-          return token
-        }
-      })
-    }
-  }
-
   static validateEmail (email) {
     return String(email)
       .toLowerCase()

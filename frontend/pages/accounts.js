@@ -63,7 +63,7 @@ export default function Accounts() {
   async function clickView(e) {
     setModalPage("ข้อมูลผู้ใช้งาน")
     setIsBtnViewLoading(true)
-    await apis.user(e.id).then((res) => { 
+    await apis.user(siteToken, e.id).then((res) => { 
       setUserData(res) 
       setIsModalOpen(true)
     });
@@ -113,9 +113,9 @@ export default function Accounts() {
 
   async function clickRemoveUser() {
     setIsModalLoading(true)
-    let res = await apis.removeUser(userData.user_id)
+    let res = await apis.removeUser(siteToken, userData.user_id)
     if (res.success) {
-      apis.userRows().then((res) => { setTableData(res) })
+      apis.userRows(siteToken).then((res) => { setTableData(res) })
       message.success(res.msg)
     }
     else {
@@ -136,7 +136,7 @@ export default function Accounts() {
     )
     if (res.success) {
       message.success(res.msg);
-      apis.userRows().then((res) => { setTableData(res) })
+      apis.userRows(siteToken).then((res) => { setTableData(res) })
     }
     else {
       message.error(res.msg);
@@ -147,23 +147,31 @@ export default function Accounts() {
 
   useEffect(() => {
     setSiteToken(localStorage.getItem("site-token"))
-    apis.userRows().then((res) => { setTableData(res) })
   }, [])
-
+  
   useEffect(() => {
     if (!isModalOpen) {
       setUserData(defaultUserData)
     }
   }, [isModalOpen])
-
+  
   useEffect(() => {
     if (siteToken === null) {
       setSigninState(false)
       router.push('/')
     }
     else {
-      // TODO validate token (get /me)
-      setSigninState(true)
+      apis.me(siteToken).then((res) => {
+        if (!res.success && signinState) {
+          localStorage.clear()
+          router.push('/')
+          setSigninState(false)
+        }
+        else {
+          apis.userRows(siteToken).then((res) => { setTableData(res) })
+          setSigninState(true)
+        }
+      })
     }
   }, [siteToken, router])
 
@@ -190,7 +198,7 @@ export default function Accounts() {
       <HeaderMain title="Banphaeo Hospital : รายการบัญชีผู้ใช้งาน" />
 
       <main>
-        <NavMain signinState={signinState} />
+        <NavMain token={siteToken} signinState={signinState} />
         {signinState === null &&
           <LoadingMain/>
         }
