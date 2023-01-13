@@ -43,12 +43,13 @@ module.exports = function (app, client, io, moment, axios, jwt, http_server) {
     const token = authHeader && authHeader.split(' ')[1]
   
     if (token == null) return res.status(401).send({"success":false,"msg":"Unauthorized user."})
-  
+    
+
     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
       
       if (err) {
-        console.log('err :>> ', err);
-        console.log('token :>> ', token);
+        //console.log('err :>> ', err);
+        //console.log('token :>> ', token);
         return res.status(403).send({"success":false,"msg":"Forbidden user."})
       }
 
@@ -362,22 +363,21 @@ module.exports = function (app, client, io, moment, axios, jwt, http_server) {
           pid: prescriptionRecords[i]["prescript_id"],
           queueId: prescriptionRecords[i]["waiting_queue"],
           prescriptId: prescriptionRecords[i]["prescript_no"],
-          numPart: ctrue,
           numAll: cdata,
           dt: reformat_date(prescriptionRecords[i]["submit_date"]),
         };
 
         if (cdata !== cnull && cnull > 0) {
-          cards["warning"].push(cobj);
+          cards["warning"].push({...cobj, "numPart":cnull});
           continue;
         } else if (cfalse > 0) {
-          cards["error"].push(cobj);
+          cards["error"].push({...cobj, "numPart":cfalse});
           continue;
         } else if (ctrue === cdata) {
-          cards["success"].push(cobj);
+          cards["success"].push({...cobj, "numPart":ctrue});
           continue;
         } else if (tdiff > validate_mins) {
-          cards["warning"].push(cobj);
+          cards["warning"].push({...cobj, "numPart":cnull});
           continue;
         } else {
           console.log(

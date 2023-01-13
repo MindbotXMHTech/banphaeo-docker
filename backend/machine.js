@@ -38,7 +38,7 @@ module.exports = function (app, client, io) {
 	});
 
 	//Prescription
-	app.post("/hw_prescript", async (req, res) => {
+	app.post("/hw_prescript_demo", async (req, res) => {
 
   		// Insert prescription_records database
 
@@ -84,25 +84,7 @@ module.exports = function (app, client, io) {
 	});
 
 	//3. Meidicine records
-	app.post("/hw_medicine", async (req, res) => {
-
-  		// Update status each medicine
-  		const text = "UPDATE medicine_records SET status = $1 WHERE prescript_id = $2 AND med_name = $3"
-  		const value = [req.query.result, req.query.prescript_id, req.query.med_name]
-  
-  		client.query(text, value, (error, results) => {
-    		if (error) {
-      			res.status(400).send('Invalid Update Key')
-    		} 
-    		else {  
-      			io.emit('update');
-      			res.status(201).send("Update Medicine Complete")
-    		}
-  		})
-	});
-
-	// 3. Meidicine records
-	app.post("/hw_medicine", async (req, res) => {
+	app.post("/hw_medicine_demo", async (req, res) => {
 
   		// Update status each medicine
   		const text = "UPDATE medicine_records SET status = $1 WHERE prescript_id = $2 AND med_name = $3"

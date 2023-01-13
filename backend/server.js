@@ -46,7 +46,7 @@ const moment = require("moment");
 const axios = require("axios");
 const jwt = require("jsonwebtoken");
 
-require("./banphaeo.js")(app);
+require("./banphaeo.js")(app, client);
 require("./machine.js")(app, client, io);
 require("./debug.js")(app, client);
 require("./web.js")(app, client, io, moment, axios, jwt, http_server);

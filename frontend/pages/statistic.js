@@ -138,7 +138,7 @@ export default function Stat() {
     innerRadius: 0.6,
     legend: false,
     label: {
-      type: 'inner',
+      type: 'outer',
       offset: '-50%',
       content: '{value}',
       style: {
