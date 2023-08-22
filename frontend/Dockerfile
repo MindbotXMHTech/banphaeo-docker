@@ -3,6 +3,7 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Install dependencies based on the preferred package manager
+RUN yarn config set network-timeout 300000
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
 # Omit --production flag for TypeScript devDependencies
 RUN \

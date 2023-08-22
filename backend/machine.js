@@ -3,33 +3,40 @@ module.exports = function (app, client, io) {
 	// 1. Login
 	app.post("/hw_login", async (req, res) => {
 
+		const machine_no = req.body.machine_no
+		const user_id = req.body.user_id
     	// Check Username
-  		const query = "SELECT * FROM users WHERE user_id = " + req.query.user_id
-  		client.query(query, (error, results) => {
+  		const query = "SELECT * FROM users WHERE user_id = " + user_id
+  		client.query(query, (error, results_users) => {
     		if (error) {
        			res.status(400).send('Invalid Query Key')
     		} 
     		else {
-      			if (results['rows'].length == 0){
+      			if (results_users['rows'].length == 0){
         			// No user in database
         			res.status(400).send('Not Found User')
       			}
       			else{
         			// Found user then create login_records database
         			const text = 'INSERT INTO login_records(machine_no, user_id) VALUES($1, $2) RETURNING *'
-        			const values = [req.query.machine_no, req.query.user_id]
+        			const values = [machine_no, user_id]
 
         			client.query(text, values, (error, results) => {
           				if(error){
             				//console.log(error)
-            				res.status(400).send('Invalid Insert login_records ')
+            				res.status(400).send('Invalid machine_no ')
           				}
           				else{
             				var string = JSON.stringify(results);
             				var objectValue = JSON.parse(string);
 
+            				var response = { 
+                    			"login_id"  :  objectValue.rows[0].login_id,
+                    			"name" : results_users.rows[0].name,
+                    			"surname" : results_users.rows[0].surname
+                  			}
             				//console.log(objectValue.rows[0].login_id)
-            				res.status(201).send("Login id : " + String(objectValue.rows[0].login_id))
+            				res.status(201).send(response)
           				}
         			})       
       			}

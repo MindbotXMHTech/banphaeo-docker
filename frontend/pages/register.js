@@ -1,5 +1,5 @@
-import Head from 'next/head'
-import Link from 'next/link' 
+import Head from 'next/head';
+import Link from 'next/link';
 import styles from '../styles/index.module.css';
 import { useEffect, useState } from 'react';
 import { UserOutlined, EyeInvisibleOutlined, EyeTwoTone, LoadingOutlined } from '@ant-design/icons';
@@ -8,10 +8,10 @@ import MaskedInput from "antd-mask-input";
 import { useRouter } from 'next/router';
 import FooterMain from '../components/footer_main';
 import NavMain from '../components/nav_main';
-import LoadingMain from '../components/loading_main'
+import LoadingMain from '../components/loading_main';
 import HeaderMain from '../components/header_main';
 import apis from '../manager/apis';
-import utilFuncs from '../manager/utils'
+import utilFuncs from '../manager/utils';
 
 export default function Register() {
   const [signinState, setSigninState] = useState(null);
@@ -35,7 +35,7 @@ export default function Register() {
   const { Option } = Select;
 
   async function clickRegister() {
-    let res = await apis.register(inpFname, inpLname, inpEmail, inpMobile, inpRole)
+    let res = await apis.register(inpFname, inpLname, inpEmail, inpMobile, inpPassword, inpRole);
     if (res.success) {
       message.success(res.msg);
       router.push('/');
@@ -46,19 +46,19 @@ export default function Register() {
   }
 
   useEffect(() => {
-    setSiteToken(localStorage.getItem("site-token"))
-  }, [])
+    setSiteToken(localStorage.getItem("site-token"));
+  }, []);
 
   useEffect(() => {
     if (siteToken === null) {
-      setSigninState(false)
+      setSigninState(false);
     }
     else {
       // TODO validate token (get /me)
-      setSigninState(true)
-      router.push('/')
+      setSigninState(true);
+      router.push('/');
     }
-  }, [siteToken, router])
+  }, [siteToken, router]);
 
   useEffect(() => {
     if (
@@ -71,131 +71,131 @@ export default function Register() {
       inpRePassword.length > 5 &&
       inpPassword === inpRePassword
     ) {
-      setBtnRegisterStatus(true)
+      setBtnRegisterStatus(true);
     }
     else {
-      setBtnRegisterStatus(false)
+      setBtnRegisterStatus(false);
     }
-  }, [inpEmail, inpFname, inpLname, inpMobile, inpRole, inpPassword, inpRePassword])
+  }, [inpEmail, inpFname, inpLname, inpMobile, inpRole, inpPassword, inpRePassword]);
 
   return (
     <div>
       <HeaderMain title="สมัครสมาชิก" />
 
       <main>
-        <NavMain signinState={false}/>
+        <NavMain signinState={false} />
         {signinState === null &&
-          <LoadingMain/>
+          <LoadingMain />
         }
         {signinState === false &&
           <div className={styles.signinContainer}>
             <div className={styles.signinContent}>
               <p className={styles.signinTitle}>สมัครสมาชิก</p>
-              <Input style={{border:inpEmailStatus}} 
-                type='email' 
-                placeholder="อีเมล" 
+              <Input style={{ border: inpEmailStatus }}
+                type='email'
+                placeholder="อีเมล"
                 onChange={async (e) => {
-                  setInpEmail(e.target.value)
-                  const isEmailExist = await apis.validateEmail(e.target.value)
+                  setInpEmail(e.target.value);
+                  const isEmailExist = await apis.validateEmail(e.target.value);
                   if (utilFuncs.validateEmail(e.target.value) == null) {
-                    setInpEmailStatus('1px solid red')
+                    setInpEmailStatus('1px solid red');
                   }
                   else if (!isEmailExist.success) {
-                    message.error(isEmailExist.msg)
-                    setInpEmailStatus('1px solid red')
+                    message.error(isEmailExist.msg);
+                    setInpEmailStatus('1px solid red');
                   }
                   else {
-                    setInpEmailStatus(null)
+                    setInpEmailStatus(null);
                   }
                 }} />
               <br />
-              <Input style={{border:inpFnameStatus}} 
-                type='text' 
-                placeholder="ชื่อ" 
+              <Input style={{ border: inpFnameStatus }}
+                type='text'
+                placeholder="ชื่อ"
                 onChange={(e) => {
-                  setInpFname(e.target.value)
+                  setInpFname(e.target.value);
                   if (e.target.value == null || e.target.value == "") {
-                    setInpFnameStatus('1px solid red')
+                    setInpFnameStatus('1px solid red');
                   }
                   else {
-                    setInpFnameStatus(null)
+                    setInpFnameStatus(null);
                   }
                 }} />
               <br />
-              <Input style={{border:inpLnameStatus}} 
-                type='text' 
-                placeholder="นามสกุล" 
+              <Input style={{ border: inpLnameStatus }}
+                type='text'
+                placeholder="นามสกุล"
                 onChange={(e) => {
-                  setInpLname(e.target.value)
+                  setInpLname(e.target.value);
                   if (e.target.value == null || e.target.value == "") {
-                    setInpLnameStatus('1px solid red')
+                    setInpLnameStatus('1px solid red');
                   }
                   else {
-                    setInpLnameStatus(null)
+                    setInpLnameStatus(null);
                   }
                 }} />
               <br />
               <MaskedInput
-                style={{border:inpMobileStatus}} 
+                style={{ border: inpMobileStatus }}
                 mask={
                   '000-000-0000'
                 }
-                type='text' 
-                placeholder="เบอร์โทรศัพท์" 
+                type='text'
+                placeholder="เบอร์โทรศัพท์"
                 onChange={(e) => {
-                  setInpMobile(e.unmaskedValue)
+                  setInpMobile(e.unmaskedValue);
                   if (e.unmaskedValue == null || e.unmaskedValue.length !== 10) {
-                    setInpMobileStatus('1px solid red')
+                    setInpMobileStatus('1px solid red');
                   }
                   else {
-                    setInpMobileStatus(null)
+                    setInpMobileStatus(null);
                   }
                 }} />
               <br />
-              <Row style={{alignItems:'center'}}>
-                <Col style={{textAlign:'center'}} span={7}>ผู้จัดยา : </Col>
+              <Row style={{ alignItems: 'center' }}>
+                <Col style={{ textAlign: 'center' }} span={7}>ผู้จัดยา : </Col>
                 <Col span={17}>
-                <Select
-                  showSearch
-                  defaultValue="pharmacy"
-                  style={{
-                    width: 140,
-                  }}
-                  placeholder="Search to Select"
-                  onChange={(e) => {setInpRole(e)}}
-                >
-                  <Option value="pharmacy">เภสัชกร</Option>
-                  <Option value="staff">เจ้าหน้าที่</Option>
-                </Select>
+                  <Select
+                    showSearch
+                    defaultValue="pharmacy"
+                    style={{
+                      width: 140,
+                    }}
+                    placeholder="Search to Select"
+                    onChange={(e) => { setInpRole(e); }}
+                  >
+                    <Option value="pharmacy">เภสัชกร</Option>
+                    <Option value="staff">เจ้าหน้าที่</Option>
+                  </Select>
                 </Col>
               </Row>
               <br />
-              <Input.Password 
-                style={{border:inpPasswordStatus}}
-                placeholder="รหัสผ่าน 6 ตัวอักษรขึ้นไป" 
+              <Input.Password
+                style={{ border: inpPasswordStatus }}
+                placeholder="รหัสผ่าน 6 ตัวอักษรขึ้นไป"
                 iconRender={visible => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
                 onChange={(e) => {
-                  setInpPassword(e.target.value)
+                  setInpPassword(e.target.value);
                   if (e.target.value == null || e.target.value.length < 6) {
-                    setInpPasswordStatus('1px solid red')
+                    setInpPasswordStatus('1px solid red');
                   }
                   else {
-                    setInpPasswordStatus(null)
+                    setInpPasswordStatus(null);
                   }
                 }}
               />
               <br />
-              <Input.Password 
-                style={{border:inpRePasswordStatus}}
-                placeholder="ยืนยันรหัสผ่าน" 
+              <Input.Password
+                style={{ border: inpRePasswordStatus }}
+                placeholder="ยืนยันรหัสผ่าน"
                 iconRender={visible => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
                 onChange={(e) => {
-                  setInpRePassword(e.target.value)
+                  setInpRePassword(e.target.value);
                   if (e.target.value === inpPassword && e.target.value.length > 5) {
-                    setInpRePasswordStatus(null)
+                    setInpRePasswordStatus(null);
                   }
                   else {
-                    setInpRePasswordStatus('1px solid red')
+                    setInpRePasswordStatus('1px solid red');
                   }
                 }}
               />
@@ -204,7 +204,7 @@ export default function Register() {
                 สมัครสมาชิก
               </Button>
               <Link href="/">
-                <Button type="link" size='middle' style={{color:'grey'}}>
+                <Button type="link" size='middle' style={{ color: 'grey' }}>
                   ย้อนกลับ
                 </Button>
               </Link>
@@ -213,7 +213,7 @@ export default function Register() {
         }
       </main>
 
-      <FooterMain/>
+      <FooterMain />
     </div>
-  )
+  );
 }

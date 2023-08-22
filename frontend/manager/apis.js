@@ -3,7 +3,7 @@ import axios from "axios";
 const host = process.env.NEXT_PUBLIC_HOST;
 
 export default class apis {
-  constructor() {}
+  constructor() { }
 
   static async me(token) {
     let res = await axios({
@@ -107,7 +107,7 @@ export default class apis {
     }
   }
 
-  static async register(name, surname, email, tel_number, role) {
+  static async register(name, surname, email, tel_number, password, role) {
     let res = await axios({
       method: "post",
       url: host + "/web_register",
@@ -115,7 +115,7 @@ export default class apis {
         name: name,
         surname: surname,
         email: email,
-        password: tel_number,
+        password: password,
         tel_number: tel_number,
         role: role,
       },

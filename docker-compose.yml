@@ -52,9 +52,10 @@ services:
 
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U root"]
-      interval: 5s
-      timeout: 3s
-      retries: 3
+      interval: 8s
+      timeout: 10s
+      retries: 20
+      
     volumes:
       # When the PostgresSQL container is started it will run any scripts
       # provided in the `docker-entrypoint-initdb.d` directory, this connects
@@ -65,19 +66,19 @@ services:
       - ./postgres_db/fill_tables.sql:/docker-entrypoint-initdb.d/fill_tables.sql
 
   # PostgreSQL pgAdmin panel accessible at http://localhost:16543/
-  pgadmin-compose:
-    image: dpage/pgadmin4
-    container_name: pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: "placeholder@example.com"
-      PGADMIN_DEFAULT_PASSWORD: "fakepassword123!"
-    ports:
-      - "16543:80"
-    depends_on:
+  #pgadmin-compose:
+  #  image: dpage/pgadmin4
+  #  container_name: pgadmin4
+  #  environment:
+  #    PGADMIN_DEFAULT_EMAIL: "placeholder@example.com"
+  #    PGADMIN_DEFAULT_PASSWORD: "fakepassword123!"
+  #  ports:
+  #    - "16543:80"
+  #  depends_on:
     # Our app does not work without our database
     # so this ensures our database is loaded first
-      postgres:
-        condition: service_healthy
+  #    postgres:
+  #      condition: service_healthy
 
   banphaeo-web:
     container_name: banphaeo-web
@@ -95,3 +96,4 @@ services:
     restart: always
     ports:
       - 3000:3000
+

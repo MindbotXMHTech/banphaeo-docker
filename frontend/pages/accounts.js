@@ -1,5 +1,5 @@
-import Head from 'next/head'
-import Link from 'next/link' 
+import Head from 'next/head';
+import Link from 'next/link';
 import styles from '../styles/index.module.css';
 import { useEffect, useState } from 'react';
 import { UserOutlined, EyeInvisibleOutlined, EyeTwoTone, LoadingOutlined } from '@ant-design/icons';
@@ -22,7 +22,7 @@ export default function Accounts() {
     "tel_number": '',
     "type": 'pharmacy',
     "email": ''
-  }
+  };
   const [signinState, setSigninState] = useState(null);
   const [siteToken, setSiteToken] = useState();
   const [tableData, setTableData] = useState([]);
@@ -35,7 +35,7 @@ export default function Accounts() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalLoading, setIsModalLoading] = useState(false);
   const [isBtnViewLoading, setIsBtnViewLoading] = useState(false);
-  const [btnAddStatus, setBtnAddStatus] = useState(false)
+  const [btnAddStatus, setBtnAddStatus] = useState(false);
 
   const modalFooterMode = {
     'ข้อมูลผู้ใช้งาน': [
@@ -54,27 +54,27 @@ export default function Accounts() {
         เพิ่มผู้ใช้งาน
       </Button>
     ]
-  }
+  };
 
   const { Option } = Select;
 
   const router = useRouter();
 
   async function clickView(e) {
-    setModalPage("ข้อมูลผู้ใช้งาน")
-    setIsBtnViewLoading(true)
-    await apis.user(siteToken, e.id).then((res) => { 
-      setUserData(res) 
-      setIsModalOpen(true)
+    setModalPage("ข้อมูลผู้ใช้งาน");
+    setIsBtnViewLoading(true);
+    await apis.user(siteToken, e.id).then((res) => {
+      setUserData(res);
+      setIsModalOpen(true);
     });
-    setIsBtnViewLoading(false)
+    setIsBtnViewLoading(false);
   }
 
   const tableColumns = [
     {
       title: 'ชื่อ',
       dataIndex: 'name',
-      sorter: (a,b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0)
+      sorter: (a, b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0)
     },
     {
       title: 'ประเภท',
@@ -112,68 +112,69 @@ export default function Accounts() {
   }
 
   async function clickRemoveUser() {
-    setIsModalLoading(true)
-    let res = await apis.removeUser(siteToken, userData.user_id)
+    setIsModalLoading(true);
+    let res = await apis.removeUser(siteToken, userData.user_id);
     if (res.success) {
-      apis.userRows(siteToken).then((res) => { setTableData(res) })
-      message.success(res.msg)
+      apis.userRows(siteToken).then((res) => { setTableData(res); });
+      message.success(res.msg);
     }
     else {
-      message.error(res.msg)
+      message.error(res.msg);
     }
-    setIsModalLoading(false)
-    setIsModalOpen(false)
+    setIsModalLoading(false);
+    setIsModalOpen(false);
   }
 
   async function clickAddUser() {
-    setIsModalLoading(true)
+    setIsModalLoading(true);
     let res = await apis.register(
       userData.name,
       userData.surname,
       userData.email,
       userData.tel_number,
+      userData.tel_number,
       userData.type
-    )
+    );
     if (res.success) {
       message.success(res.msg);
-      apis.userRows(siteToken).then((res) => { setTableData(res) })
+      apis.userRows(siteToken).then((res) => { setTableData(res); });
     }
     else {
       message.error(res.msg);
     }
-    setIsModalLoading(false)
-    setIsModalOpen(false)
+    setIsModalLoading(false);
+    setIsModalOpen(false);
   }
 
   useEffect(() => {
-    setSiteToken(localStorage.getItem("site-token"))
-  }, [])
-  
+    setSiteToken(localStorage.getItem("site-token"));
+  }, []);
+
   useEffect(() => {
     if (!isModalOpen) {
-      setUserData(defaultUserData)
+      setUserData(defaultUserData);
     }
-  }, [isModalOpen])
-  
+  }, [isModalOpen]);
+
   useEffect(() => {
     if (siteToken === null) {
-      setSigninState(false)
-      router.push('/')
+      setSigninState(false);
+      router.push('/');
     }
     else {
       apis.me(siteToken).then((res) => {
         if (!res.success && signinState) {
-          localStorage.clear()
-          router.push('/')
-          setSigninState(false)
+          localStorage.clear();
+          router.push('/');
+          setSigninState(false);
         }
         else {
-          apis.userRows(siteToken).then((res) => { setTableData(res) })
-          setSigninState(true)
+          apis.userRows(siteToken).then((res) => { setTableData(res); });
+          setSigninState(true);
         }
-      })
+      });
     }
-  }, [siteToken, router])
+  }, [siteToken, router]);
 
   useEffect(() => {
     if (
@@ -186,12 +187,12 @@ export default function Accounts() {
       inpEmailStatus === '' &&
       inpMobileStatus === ''
     ) {
-      setBtnAddStatus(true)
+      setBtnAddStatus(true);
     }
     else {
-      setBtnAddStatus(false)
+      setBtnAddStatus(false);
     }
-  }, [userData, inpEmailStatus, inpFnameStatus, inpLnameStatus, inpMobileStatus])
+  }, [userData, inpEmailStatus, inpFnameStatus, inpLnameStatus, inpMobileStatus]);
 
   return (
     <div>
@@ -200,98 +201,98 @@ export default function Accounts() {
       <main>
         <NavMain token={siteToken} signinState={signinState} />
         {signinState === null &&
-          <LoadingMain/>
+          <LoadingMain />
         }
         {signinState === true &&
           <div className='container'>
-            <NavSide  activeRoute='/accounts' />
+            <NavSide activeRoute='/accounts' />
             <div className='container-content'>
-              <div style={{display:'flex',flexDirection:'row',justifyContent:'space-between',alignItems:'center'}}>
+              <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h1>รายการผู้ใช้</h1>
                 <Button key="cancelEdit" type="primary" onClick={clickAdd}>
                   เพิ่มผู้ใช้งาน
                 </Button>
               </div>
-              <Table columns={tableColumns} dataSource={tableData} rowKey="name" style={{margin: "20px"}} />
+              <Table columns={tableColumns} dataSource={tableData} rowKey="name" style={{ margin: "20px" }} />
               <Modal title="ข้อมูลผู้ใช้งาน"
                 open={isModalOpen} onCancel={clickCancel} confirmLoading={isModalLoading}
                 footer={modalFooterMode[modalPage]}>
                 {modalPage == "เพิ่มผู้ใช้งาน" &&
                   <div>
-                    <Row style={{alignItems:'center', marginBottom:'14px'}}>
+                    <Row style={{ alignItems: 'center', marginBottom: '14px' }}>
                       <Col span={7}>ชื่อ :</Col>
                       <Col>
-                        <Input style={{border:inpFnameStatus}} 
-                          value={userData.name} 
+                        <Input style={{ border: inpFnameStatus }}
+                          value={userData.name}
                           onChange={(e) => {
-                            setUserData((prev) => ({...prev, "name":e.target.value}))
+                            setUserData((prev) => ({ ...prev, "name": e.target.value }));
                             if (e.target.value.length < 1) {
-                              setInpFnameStatus('1px solid red')
+                              setInpFnameStatus('1px solid red');
                             }
                             else {
-                              setInpFnameStatus('')
+                              setInpFnameStatus('');
                             }
                           }} />
                       </Col>
                     </Row>
-                    <Row style={{alignItems:'center', marginBottom:'14px'}}>
+                    <Row style={{ alignItems: 'center', marginBottom: '14px' }}>
                       <Col span={7}>นามสกุล :</Col>
                       <Col>
-                        <Input style={{border:inpFnameStatus}} 
-                          value={userData.surname} 
+                        <Input style={{ border: inpFnameStatus }}
+                          value={userData.surname}
                           onChange={(e) => {
-                            setUserData((prev) => ({...prev, "surname":e.target.value}))
+                            setUserData((prev) => ({ ...prev, "surname": e.target.value }));
                             if (e.target.value.length < 1) {
-                              setInpLnameStatus('1px solid red')
+                              setInpLnameStatus('1px solid red');
                             }
                             else {
-                              setInpLnameStatus('')
+                              setInpLnameStatus('');
                             }
                           }} />
                       </Col>
                     </Row>
-                    <Row style={{alignItems:'center', marginBottom:'14px'}}>
+                    <Row style={{ alignItems: 'center', marginBottom: '14px' }}>
                       <Col span={7}>อีเมล :</Col>
                       <Col>
-                        <Input style={{border:inpEmailStatus}} 
+                        <Input style={{ border: inpEmailStatus }}
                           value={userData.email} onChange={async (e) => {
-                          setUserData((prev) => ({...prev, "email":e.target.value}))
-                          const isEmailExist = await apis.validateEmail(e.target.value)
-                          if (utilFuncs.validateEmail(e.target.value) == null) {
-                            setInpEmailStatus('1px solid red')
-                          }
-                          else if (!isEmailExist.success) {
-                            message.error(isEmailExist.msg)
-                            setInpEmailStatus('1px solid red')
-                          }
-                          else {
-                            setInpEmailStatus('')
-                          }
-                        }} />
+                            setUserData((prev) => ({ ...prev, "email": e.target.value }));
+                            const isEmailExist = await apis.validateEmail(e.target.value);
+                            if (utilFuncs.validateEmail(e.target.value) == null) {
+                              setInpEmailStatus('1px solid red');
+                            }
+                            else if (!isEmailExist.success) {
+                              message.error(isEmailExist.msg);
+                              setInpEmailStatus('1px solid red');
+                            }
+                            else {
+                              setInpEmailStatus('');
+                            }
+                          }} />
                       </Col>
                     </Row>
-                    <Row style={{alignItems:'center', marginBottom:'14px'}}>
+                    <Row style={{ alignItems: 'center', marginBottom: '14px' }}>
                       <Col span={7}>เบอร์โทรศัพท์ :</Col>
                       <Col>
-                      <MaskedInput
-                        style={{border:inpMobileStatus}} 
-                        mask={
-                          '000-000-0000'
-                        }
-                        type='text' 
-                        onChange={(e) => {
-                          setUserData((prev) => ({...prev, "tel_number":e.unmaskedValue}))
-                          if (e.unmaskedValue == null || e.unmaskedValue.length !== 10) {
-                            setInpMobileStatus('1px solid red')
+                        <MaskedInput
+                          style={{ border: inpMobileStatus }}
+                          mask={
+                            '000-000-0000'
                           }
-                          else {
-                            setInpMobileStatus('')
-                          }
-                        }} />
+                          type='text'
+                          onChange={(e) => {
+                            setUserData((prev) => ({ ...prev, "tel_number": e.unmaskedValue }));
+                            if (e.unmaskedValue == null || e.unmaskedValue.length !== 10) {
+                              setInpMobileStatus('1px solid red');
+                            }
+                            else {
+                              setInpMobileStatus('');
+                            }
+                          }} />
                       </Col>
-                      <Col style={{'color':'red'}}>&nbsp;&nbsp;&nbsp;*ใช้สำหรับรหัสผ่าน</Col>
+                      <Col style={{ 'color': 'red' }}>&nbsp;&nbsp;&nbsp;*ใช้สำหรับรหัสผ่าน</Col>
                     </Row>
-                    <Row style={{alignItems:'center', marginBottom:'14px'}}>
+                    <Row style={{ alignItems: 'center', marginBottom: '14px' }}>
                       <Col span={7}>ผู้จัดยา : </Col>
                       <Col span={15}>
                         <Select
@@ -302,7 +303,7 @@ export default function Accounts() {
                             width: 140,
                           }}
                           placeholder="Search to Select"
-                          onChange={(e) => {setUserData((prev) => ({...prev, "type":e}))}}
+                          onChange={(e) => { setUserData((prev) => ({ ...prev, "type": e })); }}
                         >
                           <Option value="pharmacy">เภสัชกร</Option>
                           <Option value="staff">เจ้าหน้าที่</Option>
@@ -313,31 +314,31 @@ export default function Accounts() {
                 }
                 {modalPage == "ข้อมูลผู้ใช้งาน" &&
                   <div>
-                    <Row style={{alignItems:'center', marginBottom:'14px', border:inpFnameStatus}}>
+                    <Row style={{ alignItems: 'center', marginBottom: '14px', border: inpFnameStatus }}>
                       <Col span={7}>ชื่อ :</Col>
                       <Col>
                         <Input value={userData.name} disabled />
                       </Col>
                     </Row>
-                    <Row style={{alignItems:'center', marginBottom:'14px', border:inpLnameStatus}}>
+                    <Row style={{ alignItems: 'center', marginBottom: '14px', border: inpLnameStatus }}>
                       <Col span={7}>นามสกุล :</Col>
                       <Col>
                         <Input value={userData.surname} disabled />
                       </Col>
                     </Row>
-                    <Row style={{alignItems:'center', marginBottom:'14px', border:inpEmailStatus}}>
+                    <Row style={{ alignItems: 'center', marginBottom: '14px', border: inpEmailStatus }}>
                       <Col span={7}>อีเมล :</Col>
                       <Col>
                         <Input value={userData.email} disabled />
                       </Col>
                     </Row>
-                    <Row style={{alignItems:'center', marginBottom:'14px', border:inpMobileStatus}}>
+                    <Row style={{ alignItems: 'center', marginBottom: '14px', border: inpMobileStatus }}>
                       <Col span={7}>เบอร์โทรศัพท์ :</Col>
                       <Col>
                         <Input value={userData.tel_number} disabled />
                       </Col>
                     </Row>
-                    <Row style={{alignItems:'center', marginBottom:'14px'}}>
+                    <Row style={{ alignItems: 'center', marginBottom: '14px' }}>
                       <Col span={7}>ผู้จัดยา :</Col>
                       <Col>
                         <Input value={userData.role} disabled />
@@ -351,7 +352,7 @@ export default function Accounts() {
         }
       </main>
 
-      <FooterMain withSidebar={true}/>
+      <FooterMain withSidebar={true} />
     </div>
-  )
+  );
 }

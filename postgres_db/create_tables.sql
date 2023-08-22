@@ -16,9 +16,8 @@ CREATE TABLE users
 CREATE TABLE login_records
 (
     login_id            serial not null,
-    machine_no          integer not null,
+    machine_no          macaddr not null,
     login_date          TIMESTAMP WITH TIME ZONE DEFAULT now(),
-    
     user_id             serial not null,
 
     constraint pk_login_records primary key (login_id),
@@ -36,6 +35,7 @@ CREATE TABLE prescription_records
     age                 integer not null,
     hospital_unit       text not null,
     submit_date         TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    status              BOOLEAN NOT NULL,
     
     login_id            serial not null,
 
@@ -47,6 +47,8 @@ CREATE TABLE medicine_records
 (
     medical_id          serial not null,
     med_name            text not null,
+    pred_cls            text,
+    image               text,
     dose                integer not null,
     doctor              text not null,          
     status              boolean,

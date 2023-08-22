@@ -1,0 +1,120 @@
+{
+	"info": {
+		"_postman_id": "ded86cbf-fe4f-4a25-9d74-aa85e9219619",
+		"name": "AI-MED Copy",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "7174235"
+	},
+	"item": [
+		{
+			"name": "all_users(debug)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://103.74.254.93:8080/all_users",
+					"protocol": "http",
+					"host": [
+						"103",
+						"74",
+						"254",
+						"93"
+					],
+					"port": "8080",
+					"path": [
+						"all_users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "all_login_records(debug)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://103.74.254.93:8080/all_login_records",
+					"protocol": "http",
+					"host": [
+						"103",
+						"74",
+						"254",
+						"93"
+					],
+					"port": "8080",
+					"path": [
+						"all_login_records"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "all_prescription_records(debug)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://103.74.254.93:8080/all_prescription_records",
+					"protocol": "http",
+					"host": [
+						"103",
+						"74",
+						"254",
+						"93"
+					],
+					"port": "8080",
+					"path": [
+						"all_prescription_records"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "all_medicine_records(debug)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://103.74.254.93:8080/all_medicine_records",
+					"protocol": "http",
+					"host": [
+						"103",
+						"74",
+						"254",
+						"93"
+					],
+					"port": "8080",
+					"path": [
+						"all_medicine_records"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "clear_records(debug)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://103.74.254.93:8080/clear_records",
+					"protocol": "http",
+					"host": [
+						"103",
+						"74",
+						"254",
+						"93"
+					],
+					"port": "8080",
+					"path": [
+						"clear_records"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
