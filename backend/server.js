@@ -3,6 +3,7 @@ const { Pool, Client } = require("pg");
 // Constants
 const PORT = process.env.PORT;
 const HOST = process.env.DOMAIN;
+const PORT_WEB = process.env.PORT_WEB;
 
 // Express jobs
 const express = require("express");
@@ -12,7 +13,7 @@ const app = express();
 
 //app.use(express.json()) //For JSON requests
 app.use(cors());
-app.use(express.json({limit: '50mb'}));
+app.use(express.json({ limit: '50mb' }));
 app.use(express.static("public"));
 
 
@@ -20,7 +21,7 @@ app.use(express.static("public"));
 const http_server = require("http").Server(app);
 const io = require("socket.io")(http_server, {
   cors: {
-    origin: "*",
+    origin: `http://${HOST}:${PORT_WEB}`,
   },
 });
 
@@ -32,8 +33,8 @@ io.on("connection", (socket) => {
 
 // Cron jobs
 const cron = require("node-cron");
-cron.schedule("* * * * *", () => {
-  console.log("Run task every minute");
+cron.schedule("*/5 * * * * *", () => {
+  // console.log("Run task every 5 seconds");
   io.emit("update");
 });
 

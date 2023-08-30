@@ -3,7 +3,7 @@ import json
 import time
 
 #Machine - Login Machine
-url = "http://0.0.0.0:8080/hw_login"
+url = "http://localhost:8080/hw_login"
 data = {'user_id' : '0', 'machine_no': 'd0:88:0c:61:62:55'}
 r = requests.post(url, json = data)
 receive = json.loads(r.text)

@@ -14,6 +14,20 @@ docker-compose up
 
 And go to [http://localhost:8080]()
 
+## Dev on local
+
+### Front-end
+
+- run
+
+  ```bash
+  # bash, for cmd use 'set'
+  export NEXT_PUBLIC_HOST=[value from .env]
+  export NEXT_PUBLIC_SOCKET_URI=[value from .env]
+  npm i
+  npm run dev
+  ```
+
 ## Tutorial
 
 All code from this tutorial as a complete package is available in [this repository](https://github.com/alexeagleson/docker-node-postgres-template). If you find this tutorial helpful, please share it with your friends and colleagues!

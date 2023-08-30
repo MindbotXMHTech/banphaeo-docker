@@ -1,20 +1,15 @@
 // Parameter
-const validate_mins = process.env.VALIDATE_MINS;
-const otp_expired = 900000 // 15 mins
-// const validate_mins = 5;
+const otp_expired = 900000; // 15 mins
 
 module.exports = function (app, client, io, moment, axios, jwt, http_server) {
 
   // Functions
   function reformat_date(mydt) {
     // dd/MM/yyyy hh:mm:ss
-    return `${mydt.getDate()}/${
-      (mydt.getMonth() < 9 ? "0" : "") + (mydt.getMonth() + 1)
-    }/${mydt.getFullYear()} ${
-      (mydt.getHours() < 10 ? "0" : "") + mydt.getHours()
-    }:${(mydt.getMinutes() < 10 ? "0" : "") + mydt.getMinutes()}:${
-      (mydt.getSeconds() < 10 ? "0" : "") + mydt.getSeconds()
-    }`;
+    return `${mydt.getDate()}/${(mydt.getMonth() < 9 ? "0" : "") + (mydt.getMonth() + 1)
+      }/${mydt.getFullYear()} ${(mydt.getHours() < 10 ? "0" : "") + mydt.getHours()
+      }:${(mydt.getMinutes() < 10 ? "0" : "") + mydt.getMinutes()}:${(mydt.getSeconds() < 10 ? "0" : "") + mydt.getSeconds()
+      }`;
   }
 
   function randomLongString(num) {
@@ -24,7 +19,7 @@ module.exports = function (app, client, io, moment, axios, jwt, http_server) {
       .map(() => alp[Math.floor(Math.random() * alp.length)])
       .join("");
   }
-  
+
   function randomLongInt(num) {
     const alp = "0123456789";
     return Array(num)
@@ -39,37 +34,37 @@ module.exports = function (app, client, io, moment, axios, jwt, http_server) {
 
   // Middlewares
   function authenticateToken(req, res, next) {
-    const authHeader = req.headers['authorization']
-    const token = authHeader && authHeader.split(' ')[1]
-  
-    if (token == null) return res.status(401).send({"success":false,"msg":"Unauthorized user."})
-    
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (token == null) return res.status(401).send({ "success": false, "msg": "Unauthorized user." });
+
 
     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-      
+
       if (err) {
         //console.log('err :>> ', err);
         //console.log('token :>> ', token);
-        return res.status(403).send({"success":false,"msg":"Forbidden user."})
+        return res.status(403).send({ "success": false, "msg": "Forbidden user." });
       }
 
       client
         .query("SELECT user_id, name, surname, email, tel_number, role, registration_date FROM users WHERE user_id=$1", [user.sub])
         .then((results) => {
-          if (results.rows.length != 1) res.status(401).send({"success":false,"msg":"Unauthorized user."})
+          if (results.rows.length != 1) res.status(401).send({ "success": false, "msg": "Unauthorized user." });
           else {
-            req.user = results.rows[0]
-            next()
+            req.user = results.rows[0];
+            next();
           }
-        })
-    })
+        });
+    });
   }
 
   app.use((req, res, next) => {
     // if (!req.originalUrl.includes('socket.io')) 
     console.log(`[ LOG ] ${req.method} ${req.originalUrl}`);
-    next()
-  })
+    next();
+  });
 
   // Login page
   app.post("/web_register", async (req, res) => {
@@ -106,7 +101,7 @@ module.exports = function (app, client, io, moment, axios, jwt, http_server) {
         });
 
       if (results.length == 1) {
-        const token = generateAccessToken({"sub":results[0]["user_id"],"iat":Date.now()})
+        const token = generateAccessToken({ "sub": results[0]["user_id"], "iat": Date.now() });
         res.setHeader("Content-Type", "application/json");
         res.status(200).send(
           JSON.stringify({
@@ -134,7 +129,7 @@ module.exports = function (app, client, io, moment, axios, jwt, http_server) {
   app.post("/web_password/request_reset", async (req, res) => {
     try {
       var email = req.query.email;
-      var iat = req.query.iat
+      var iat = req.query.iat;
     } catch (err) {
       console.error(err);
       res.status(400).send("Invalid Query Key");
@@ -170,9 +165,9 @@ module.exports = function (app, client, io, moment, axios, jwt, http_server) {
           "params": {
             "reciever_email": email,
             "title": "Banphaeo Dashboard : Reset password request",
-            "content": `คุณส่งคำขอเปลี่ยนรหัสผ่าน OTP คือ ${otp} (ref code: ${otp_ref}) กรุณาดำเนินการภายใน ${otp_expired/60000} นาที`
+            "content": `คุณส่งคำขอเปลี่ยนรหัสผ่าน OTP คือ ${otp} (ref code: ${otp_ref}) กรุณาดำเนินการภายใน ${otp_expired / 60000} นาที`
           }
-        })
+        });
       } else if (results.length === 0) {
         res.setHeader("Content-Type", "application/json");
         res.status(200).send(
@@ -200,7 +195,7 @@ module.exports = function (app, client, io, moment, axios, jwt, http_server) {
   app.post("/web_password/otp_validation", async (req, res) => {
     try {
       var email = req.query.email;
-      var otp = req.query.otp
+      var otp = req.query.otp;
     } catch (err) {
       console.error(err);
       res.status(400).send("Invalid Query Key");
@@ -209,16 +204,16 @@ module.exports = function (app, client, io, moment, axios, jwt, http_server) {
 
     try {
       const results = await client
-        .query("SELECT otp->>'val'=$1 as is_valid, user_id, password FROM users WHERE email=$2 AND otp->>'iat'>$3", [otp, email, Date.now()-otp_expired])
+        .query("SELECT otp->>'val'=$1 as is_valid, user_id, password FROM users WHERE email=$2 AND otp->>'iat'>$3", [otp, email, Date.now() - otp_expired])
         .then((payload) => {
-          return payload.rows[0]
-        })
-      if (!results) res.status(200).send({ "status":false, "msg":"No matched email or OTP expired." })
+          return payload.rows[0];
+        });
+      if (!results) res.status(200).send({ "status": false, "msg": "No matched email or OTP expired." });
       else if (results.is_valid == true) {
-        const token = generateAccessToken({"sub":results["user_id"],"iat":Date.now()})
-        res.status(200).send({ "status":results.is_valid, "msg":"valid", "token": token })
+        const token = generateAccessToken({ "sub": results["user_id"], "iat": Date.now() });
+        res.status(200).send({ "status": results.is_valid, "msg": "valid", "token": token });
       }
-      else res.status(200).send({ "status":results.is_valid, "msg":"invalid" })
+      else res.status(200).send({ "status": results.is_valid, "msg": "invalid" });
     } catch (err) {
       console.error(err);
       res.status(500).send("Internal server error.");
@@ -285,12 +280,33 @@ module.exports = function (app, client, io, moment, axios, jwt, http_server) {
         error: [],
         warning: [],
       };
-      let idInCardList = [];
 
       // get all prescription records
       const prescriptionRecords = await client
         .query(
-          "SELECT prescript_id, prescript_no, waiting_queue, submit_date AT TIME ZONE 'ALMST' AS submit_date, login_id FROM prescription_records ORDER BY submit_date ASC LIMIT 150"
+          `WITH RankedPrescriptions AS (
+            SELECT 
+              prescript_id, 
+              prescript_no, 
+              waiting_queue,
+              status, 
+              submit_date AT TIME ZONE 'ALMST' AS submit_date, 
+              login_id,
+              ROW_NUMBER() OVER (PARTITION BY prescript_no ORDER BY submit_date DESC) AS row_num
+            FROM prescription_records
+          )
+          SELECT 
+            prescript_id, 
+            prescript_no, 
+            waiting_queue, 
+            status,
+            submit_date, 
+            login_id
+          FROM RankedPrescriptions
+          WHERE row_num = 1
+          ORDER BY submit_date ASC
+          LIMIT 150;
+          `
         )
         .then((payload) => {
           return payload.rows;
@@ -299,10 +315,10 @@ module.exports = function (app, client, io, moment, axios, jwt, http_server) {
       // loop through all prescription records
       let i = prescriptionRecords.length;
       while (i--) {
-        // check duplicated prescription record
-        if (idInCardList.includes(prescriptionRecords[i].prescript_no))
+        // do not show if status is not true
+        if (!prescriptionRecords[i].status) {
           continue;
-        else idInCardList.push(prescriptionRecords[i].prescript_no);
+        }
 
         // get all medicine records that matched with prescript_id
         let med_status = await client
@@ -315,20 +331,16 @@ module.exports = function (app, client, io, moment, axios, jwt, http_server) {
           });
 
         let cdata = med_status.length;
-        let tnow = moment().add(7, "h");
-        let trec = moment(prescriptionRecords[i]["submit_date"]);
-        let tdiff = moment.duration(tnow.diff(trec)).asMinutes();
 
-        // check all med record which is added less than validate_mins mins and be null
+        // check all med record which is null
         let i2 = med_status.length;
         while (i2--) {
-          if (med_status[i2]["status"] === null && tdiff < validate_mins) {
+          if (med_status[i2]["status"] === null) {
             prescriptionRecords.splice(i, 1);
             i2 = -99;
             break;
           }
         }
-
         if (i2 === -99) {
           continue;
         }
@@ -368,20 +380,17 @@ module.exports = function (app, client, io, moment, axios, jwt, http_server) {
         };
 
         if (cdata !== cnull && cnull > 0) {
-          cards["warning"].push({...cobj, "numPart":cnull});
+          cards["warning"].push({ ...cobj, "numPart": cnull });
           continue;
         } else if (cfalse > 0) {
-          cards["error"].push({...cobj, "numPart":cfalse});
+          cards["error"].push({ ...cobj, "numPart": cfalse });
           continue;
         } else if (ctrue === cdata) {
-          cards["success"].push({...cobj, "numPart":ctrue});
-          continue;
-        } else if (tdiff > validate_mins) {
-          cards["warning"].push({...cobj, "numPart":cnull});
+          cards["success"].push({ ...cobj, "numPart": ctrue });
           continue;
         } else {
           console.log(
-            `Prescription ID ${prescriptionRecords[i]["prescript_id"]} was ignored. cdata=${cdata} cnull=${cnull} tdiff=${tdiff}`
+            `Prescription ID ${prescriptionRecords[i]["prescript_id"]} was ignored. cdata=${cdata} cnull=${cnull}`
           );
         }
       }
@@ -402,7 +411,14 @@ module.exports = function (app, client, io, moment, axios, jwt, http_server) {
       // get all prescription records that related to a prescript_id
       let prescriptionRecords = await client
         .query(
-          "SELECT prescript_id, prescript_no, waiting_queue, patient_name, hn, age, hospital_unit, login_id, submit_date AT TIME ZONE 'ALMST' AS submit_date FROM prescription_records WHERE prescript_no = (SELECT prescript_no FROM prescription_records WHERE prescript_id=$1) ORDER BY prescript_id DESC",
+          `SELECT prescript_id, prescript_no, waiting_queue, patient_name, 
+            hn, age, hospital_unit, login_id, 
+            submit_date AT TIME ZONE 'ALMST' AS submit_date 
+          FROM prescription_records 
+          WHERE prescript_no = (SELECT prescript_no 
+            FROM prescription_records 
+            WHERE prescript_id=$1) 
+          ORDER BY prescript_id DESC`,
           [req.params.id]
         )
         .then((payload) => {
@@ -410,7 +426,7 @@ module.exports = function (app, client, io, moment, axios, jwt, http_server) {
         });
       if (prescriptionRecords.length < 1) {
         res.status(200).send(null);
-        return
+        return;
       }
       card = prescriptionRecords[0];
       card["med_rec"] = [];
@@ -428,14 +444,10 @@ module.exports = function (app, client, io, moment, axios, jwt, http_server) {
             return payload.rows;
           });
 
-        let tnow = moment().add(7, "h");
-        let trec = moment(prescriptionRecords[i]["submit_date"]);
-        let tdiff = moment.duration(tnow.diff(trec)).asMinutes();
-
-        // check first med record which is added less than validate_mins mins
+        // check first med record which is null
         let i2 = med_status.length;
         while (i2--) {
-          if (med_status[i2]["status"] === null && tdiff < validate_mins) {
+          if (med_status[i2]["status"] === null) {
             prescriptionRecords.splice(i, 1);
             i2 = -99;
             break;
@@ -480,8 +492,8 @@ module.exports = function (app, client, io, moment, axios, jwt, http_server) {
           });
           card["doctor"] =
             card["doctor"] !== undefined &&
-            card["doctor"].length > 0 &&
-            !card["doctor"].includes(val["doctor"])
+              card["doctor"].length > 0 &&
+              !card["doctor"].includes(val["doctor"])
               ? `${card["doctor"]}, ${val["doctor"]}`
               : val["doctor"];
         });
@@ -587,10 +599,10 @@ module.exports = function (app, client, io, moment, axios, jwt, http_server) {
         let trec = moment(prescriptionRecords[i]["submit_date"]);
         let tdiff = moment.duration(tnow.diff(trec)).asMinutes();
 
-        // check first med record which is added less than validate_mins mins
+        // check first med record which is null
         let i2 = med_status.length;
         while (i2--) {
-          if (med_status[i2]["status"] === null && tdiff < validate_mins) {
+          if (med_status[i2]["status"] === null) {
             prescriptionRecords.splice(i, 1);
             i2 = -99;
             break;
@@ -657,17 +669,6 @@ module.exports = function (app, client, io, moment, axios, jwt, http_server) {
             ...prescriptionRecords[i],
             submit_date: reformat_date(prescriptionRecords[i]["submit_date"]),
             status: parse_status("success"),
-            num: `${ctrue}/${cdata}`,
-            numPart: ctrue,
-            numAll: cdata,
-          });
-          continue;
-        } else if (tdiff > validate_mins) {
-          cpnull++;
-          table.push({
-            ...prescriptionRecords[i],
-            submit_date: reformat_date(prescriptionRecords[i]["submit_date"]),
-            status: parse_status("warning"),
             num: `${ctrue}/${cdata}`,
             numPart: ctrue,
             numAll: cdata,
@@ -794,8 +795,8 @@ module.exports = function (app, client, io, moment, axios, jwt, http_server) {
 
   // Main navigation
   app.get("/web_me", authenticateToken, async (req, res) => {
-    res.status(200).send(req.user)
-  })
+    res.status(200).send(req.user);
+  });
 
   app.put("/web_user/:id/password", authenticateToken, async (req, res) => {
     try {

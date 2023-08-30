@@ -16,7 +16,7 @@ import CardMed from '../components/card_med';
 import apis from '../manager/apis';
 
 export default function Main() {
-  const socket = io(process.env.NEXT_PUBLIC_SOCKET_URI, {reconnectionDelayMax: 10000, transports: ["websocket"]})
+  const [socket, setSocket] = useState(null);
   const [signinState, setSigninState] = useState(null)
   const [siteToken, setSiteToken] = useState(null)
   const [inpEmail, setInpEmail] = useState()
@@ -37,11 +37,11 @@ export default function Main() {
   useEffect(() => {
     setSiteToken(localStorage.getItem("site-token"))
 
-    socket.on("connect", () => { console.log("Connected:", socket.id) });
-    socket.on("response", () => { console.log("Response:", socket.id) });
-    socket.on("update", () => { 
-      setUpCard();
-    });
+    return () => {
+      if (socket && socket.connected) {
+        socket.disconnect()
+      }
+    }
   }, [])
 
   useEffect(() => {
@@ -62,6 +62,22 @@ export default function Main() {
       })
     }
   }, [siteToken])
+
+  useEffect(() => {
+    console.log('signinState :>> ', signinState, process.env.NEXT_PUBLIC_SOCKET_URI);
+    if (signinState) {
+      const newSocket = io.connect(process.env.NEXT_PUBLIC_SOCKET_URI, {transports:["websocket"]});
+      newSocket.on("connect", () => { console.log("Connected:", newSocket.id) });
+      newSocket.on("response", () => { console.log("Response:", newSocket.id) });
+      newSocket.on("update", () => { 
+        setUpCard();
+      });
+      setSocket(newSocket);
+    }
+    else {
+      setSocket(null)
+    }
+  }, [signinState]);
 
   return (
     <div>
