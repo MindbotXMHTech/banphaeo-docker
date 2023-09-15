@@ -22,8 +22,8 @@ And go to [http://localhost:8080]()
 
   ```bash
   # bash, for cmd use 'set'
-  export NEXT_PUBLIC_HOST=[value from .env]
-  export NEXT_PUBLIC_SOCKET_URI=[value from .env]
+  export NEXT_PUBLIC_HOST=http://127.0.0.1:8080
+  export NEXT_PUBLIC_SOCKET_URI=http://127.0.0.1:8080
   npm i
   npm run dev
   ```

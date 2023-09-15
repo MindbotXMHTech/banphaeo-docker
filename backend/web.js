@@ -332,19 +332,6 @@ module.exports = function (app, client, io, moment, axios, jwt, http_server) {
 
         let cdata = med_status.length;
 
-        // check all med record which is null
-        let i2 = med_status.length;
-        while (i2--) {
-          if (med_status[i2]["status"] === null) {
-            prescriptionRecords.splice(i, 1);
-            i2 = -99;
-            break;
-          }
-        }
-        if (i2 === -99) {
-          continue;
-        }
-
         // add all med record to a related prescription record
         prescriptionRecords[i]["med_status"] = med_status;
 
@@ -443,19 +430,6 @@ module.exports = function (app, client, io, moment, axios, jwt, http_server) {
           .then((payload) => {
             return payload.rows;
           });
-
-        // check first med record which is null
-        let i2 = med_status.length;
-        while (i2--) {
-          if (med_status[i2]["status"] === null) {
-            prescriptionRecords.splice(i, 1);
-            i2 = -99;
-            break;
-          }
-        }
-        if (i2 === -99) {
-          continue;
-        }
 
         // count status of med record
         let cnull = 0;
@@ -598,19 +572,6 @@ module.exports = function (app, client, io, moment, axios, jwt, http_server) {
         let tnow = moment().add(7, "h");
         let trec = moment(prescriptionRecords[i]["submit_date"]);
         let tdiff = moment.duration(tnow.diff(trec)).asMinutes();
-
-        // check first med record which is null
-        let i2 = med_status.length;
-        while (i2--) {
-          if (med_status[i2]["status"] === null) {
-            prescriptionRecords.splice(i, 1);
-            i2 = -99;
-            break;
-          }
-        }
-        if (i2 === -99) {
-          continue;
-        }
 
         // manage the rest of datas
         hospital_unit.push({
